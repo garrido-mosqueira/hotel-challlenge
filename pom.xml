@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <modules>
+        <module>hotel-domain</module>
+        <module>hotel-application</module>
+        <module>hotel-persistence</module>
+        <module>hotel-api</module>
+    </modules>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.0</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>com.fran</groupId>
+    <version>1.1.0</version>
+    <artifactId>hotel-java</artifactId>
+
+    <packaging>pom</packaging>
+
+    <properties>
+        <price-java.version>1.1.0</price-java.version>
+        <java.version>21</java.version>
+        <spring-boot.version>3.2.0</spring-boot.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <org.lombok.version>1.18.36</org.lombok.version>
+        <testcontainers.version>1.19.3</testcontainers.version>
+        <rest-assured.version>5.4.0</rest-assured.version>
+        <micrometer-registry-prometheus.version>1.11.1</micrometer-registry-prometheus.version>
+        <aspectjrt.version>1.9.22.1</aspectjrt.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- project modules -->
+            <dependency>
+                <groupId>com.fran</groupId>
+                <artifactId>hotel-domain</artifactId>
+                <version>${price-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fran</groupId>
+                <artifactId>hotel-application</artifactId>
+                <version>${price-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fran</groupId>
+                <artifactId>hotel-persistence</artifactId>
+                <version>${price-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fran</groupId>
+                <artifactId>virtual-threads-prices</artifactId>
+                <version>${price-java.version}</version>
+            </dependency>
+
+            <!-- spring framework-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-mongodb</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-aop</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-validation</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+
+            <!-- helpful libraries-->
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjrt</artifactId>
+                <version>${aspectjrt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${org.lombok.version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+
+            <!-- monitoring-->
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-prometheus</artifactId>
+                <version>${micrometer-registry-prometheus.version}</version>
+            </dependency>
+
+            <!-- test-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>spring-mock-mvc</artifactId>
+                <version>${rest-assured.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>mongodb</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

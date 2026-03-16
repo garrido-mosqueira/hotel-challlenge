@@ -1,0 +1,11 @@
+spring:
+  r2dbc:
+    url: r2dbc:h2:mem:///pricesdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password: sa
+  sql:
+    init:
+      mode: always
+  h2:
+    console:
+      enabled: true
