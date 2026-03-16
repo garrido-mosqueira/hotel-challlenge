@@ -1,9 +1,7 @@
 package com.fran.hotel.api.controller;
 
-import com.fran.hotel.api.dto.ReservationRequest;
-import com.fran.hotel.api.dto.ReservationResponse;
+import com.fran.hotel.api.dto.ReservationDto;
 import com.fran.hotel.api.mapper.ReservationDTOMapper;
-import com.fran.hotel.domain.model.*;
 import com.fran.hotel.domain.port.ReservationUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,28 +20,23 @@ public class ReservationController {
     private final ReservationDTOMapper mapper;
 
     @GetMapping
-    public List<ReservationResponse> getReservations(@RequestHeader(value = "X-User-Id", required = false) String userId) {
+    public List<ReservationDto> getReservations(@RequestHeader(value = "X-User-Id", required = false) String userId) {
         // for demo, if no header provided, return empty
         if (userId == null) return List.of();
-        return useCase.getReservationsForUser(userId).stream().map(mapper::toResponse).collect(Collectors.toList());
+        return useCase.getReservationsForUser(userId).stream().map(mapper::toDto).collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReservationResponse> getReservation(@PathVariable String id) {
+    public ResponseEntity<ReservationDto> getReservation(@PathVariable String id) {
         var reservation = useCase.getReservation(id);
         if (reservation == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(mapper.toResponse(reservation));
+        return ResponseEntity.ok(mapper.toDto(reservation));
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationRequest reservationRequest) {
-        // build minimal Reservation using domain models (guest, room, rate lookups are out of scope)
-        Guest guest = new Guest(reservationRequest.getId(), "", "", "");
-        Room room = new Room(reservationRequest.getRoomId(), "", "");
-        Rate rate = new Rate(reservationRequest.getRateId(), "", null);
-        Reservation reservation = new Reservation(reservationRequest.getId(), guest, room, reservationRequest.getCheckInDate(), reservationRequest.getCheckOutDate(), rate, ReservationStatus.PENDING);
-        var created = useCase.createReservation(reservation);
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(created));
+    public ResponseEntity<ReservationDto> createReservation(@RequestBody ReservationDto reservationDto) {
+        var created = useCase.createReservation(mapper.toDomain(reservationDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(created));
     }
 
     @DeleteMapping("/{id}")

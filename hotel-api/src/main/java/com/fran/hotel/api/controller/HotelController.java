@@ -1,7 +1,6 @@
 package com.fran.hotel.api.controller;
 
-import com.fran.hotel.api.dto.HotelRequest;
-import com.fran.hotel.api.dto.HotelResponse;
+import com.fran.hotel.api.dto.HotelDto;
 import com.fran.hotel.api.mapper.HotelMapper;
 import com.fran.hotel.domain.port.HotelUseCase;
 import org.springframework.http.HttpStatus;
@@ -21,22 +20,22 @@ public class HotelController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HotelResponse> getHotel(@PathVariable String id) {
+    public ResponseEntity<HotelDto> getHotel(@PathVariable String id) {
         var hotel = useCase.getHotel(id);
         if (hotel == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(mapper.toResponse(hotel));
+        return ResponseEntity.ok(mapper.toDto(hotel));
     }
 
     @PostMapping
-    public ResponseEntity<HotelResponse> addHotel(@RequestBody HotelRequest hotelRequest) {
-        var created = useCase.addHotel(mapper.toDomain(hotelRequest));
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(created));
+    public ResponseEntity<HotelDto> addHotel(@RequestBody HotelDto hotelDto) {
+        var created = useCase.addHotel(mapper.toDomain(hotelDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(created));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HotelResponse> updateHotel(@PathVariable String id, @RequestBody HotelRequest hotelRequest) {
-        var updated = useCase.updateHotel(mapper.toDomain(hotelRequest));
-        return ResponseEntity.ok(mapper.toResponse(updated));
+    public ResponseEntity<HotelDto> updateHotel(@PathVariable String id, @RequestBody HotelDto hotelDto) {
+        var updated = useCase.updateHotel(mapper.toDomain(hotelDto));
+        return ResponseEntity.ok(mapper.toDto(updated));
     }
 
     @DeleteMapping("/{id}")

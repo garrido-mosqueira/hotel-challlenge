@@ -20,18 +20,33 @@ import java.util.stream.Collectors;
 public class HotelServiceConfiguration {
 
     @Bean
+    public com.fran.hotel.domain.port.HotelPersistencePort hotelPersistencePort() {
+        return new com.fran.hotel.persistence.adapter.InMemoryHotelPersistenceAdapter();
+    }
+
+    @Bean
+    public com.fran.hotel.domain.port.RoomPersistencePort roomPersistencePort() {
+        return new com.fran.hotel.persistence.adapter.InMemoryRoomPersistenceAdapter();
+    }
+
+    @Bean
+    public com.fran.hotel.domain.port.ReservationPersistencePort reservationPersistencePort() {
+        return new com.fran.hotel.persistence.adapter.InMemoryReservationPersistenceAdapter();
+    }
+
+    @Bean
     public HotelUseCase hotelUseCase() {
-        return new InMemoryHotelUseCase();
+        return new com.fran.hotel.application.service.HotelService(hotelPersistencePort());
     }
 
     @Bean
     public RoomUseCase roomUseCase() {
-        return new InMemoryRoomUseCase();
+        return new com.fran.hotel.application.service.RoomService(roomPersistencePort());
     }
 
     @Bean
     public ReservationUseCase reservationUseCase() {
-        return new InMemoryReservationUseCase();
+        return new com.fran.hotel.application.service.ReservationService(reservationPersistencePort());
     }
 
     static class InMemoryHotelUseCase implements HotelUseCase {

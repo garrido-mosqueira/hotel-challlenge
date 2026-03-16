@@ -1,7 +1,6 @@
 package com.fran.hotel.api.controller;
 
-import com.fran.hotel.api.dto.RoomRequest;
-import com.fran.hotel.api.dto.RoomResponse;
+import com.fran.hotel.api.dto.RoomDto;
 import com.fran.hotel.api.mapper.RoomDTOMapper;
 import com.fran.hotel.domain.model.Room;
 import com.fran.hotel.domain.port.RoomUseCase;
@@ -22,24 +21,24 @@ public class RoomController {
     }
 
     @GetMapping("/{roomId}")
-    public ResponseEntity<RoomResponse> getRoom(@PathVariable String hotelId, @PathVariable String roomId) {
+    public ResponseEntity<RoomDto> getRoom(@PathVariable String hotelId, @PathVariable String roomId) {
         var room = useCase.getRoom(hotelId, roomId);
         if (room == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(mapper.toResponse(room));
+        return ResponseEntity.ok(mapper.toDto(room));
     }
 
     @PostMapping
-    public ResponseEntity<RoomResponse> addRoom(@PathVariable String hotelId, @RequestBody RoomRequest request) {
-        Room room = new Room(request.getId(), request.getRoomNumber(), request.getType());
+    public ResponseEntity<RoomDto> addRoom(@PathVariable String hotelId, @RequestBody RoomDto request) {
+        Room room = mapper.toDomain(request);
         var created = useCase.addRoom(hotelId, room);
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(created));
     }
 
     @PutMapping("/{roomId}")
-    public ResponseEntity<RoomResponse> updateRoom(@PathVariable String hotelId, @PathVariable String roomId, @RequestBody RoomRequest request) {
-        Room room = new Room(roomId, request.getRoomNumber(), request.getType());
+    public ResponseEntity<RoomDto> updateRoom(@PathVariable String hotelId, @PathVariable String roomId, @RequestBody RoomDto request) {
+        Room room = mapper.toDomain(request);
         var updated = useCase.updateRoom(hotelId, room);
-        return ResponseEntity.ok(mapper.toResponse(updated));
+        return ResponseEntity.ok(mapper.toDto(updated));
     }
 
     @DeleteMapping("/{roomId}")
