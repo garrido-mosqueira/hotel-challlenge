@@ -11,7 +11,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
@@ -23,8 +23,7 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
     @Autowired
     private HotelRepository hotelRepository;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    private RestClient restClient;
 
     @LocalServerPort
     private int port;
@@ -34,13 +33,19 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
     @BeforeEach
     void setup() {
         hotelRepository.deleteAll();
+        restClient = RestClient.builder().baseUrl(baseUrl()).build();
     }
 
     @Test
     void createHotel() {
         HotelDto request = new HotelDto("h1", "Hotel One", List.of());
 
-        ResponseEntity<HotelDto> response = restTemplate.postForEntity(baseUrl(), request, HotelDto.class);
+        ResponseEntity<HotelDto> response = restClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toEntity(HotelDto.class);
+
         assertThat(response.getStatusCodeValue()).isEqualTo(201);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getName()).isEqualTo("Hotel One");
@@ -54,7 +59,10 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
         hotelRepository.save(new HotelEntity("h2", "Hotel 2"));
         hotelRepository.save(new HotelEntity("h3", "Hotel 3"));
 
-        ResponseEntity<List<HotelDto>> response = restTemplate.exchange(baseUrl(), org.springframework.http.HttpMethod.GET, null, new ParameterizedTypeReference<List<HotelDto>>(){});
+        ResponseEntity<List<HotelDto>> response = restClient.get()
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<HotelDto>>(){});
+
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).extracting(HotelDto::getName).contains("Hotel 2", "Hotel 3");

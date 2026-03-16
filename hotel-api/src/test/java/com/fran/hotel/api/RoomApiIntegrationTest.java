@@ -24,8 +24,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
     @Autowired
     private RoomRepository roomRepository;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    private RestClient restClient;
 
     @LocalServerPort
     private int port;
@@ -36,6 +35,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
     void setup() {
         roomRepository.deleteAll();
         hotelRepository.deleteAll();
+        restClient = RestClient.builder().baseUrl(baseUrl(hotelRepository.save(new HotelEntity("tmp","tmp")).getId())).build();
     }
 
     @Test
@@ -45,7 +45,11 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
 
         RoomDto request = new RoomDto("r1", "101", "STANDARD");
 
-        ResponseEntity<RoomDto> response = restTemplate.postForEntity(baseUrl(h.getId()), request, RoomDto.class);
+        ResponseEntity<RoomDto> response = restClient.post()
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toEntity(RoomDto.class);
         assertThat(response.getStatusCodeValue()).isEqualTo(201);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getRoomNumber()).isEqualTo("101");

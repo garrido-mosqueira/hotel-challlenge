@@ -21,8 +21,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    private RestClient restClient;
 
     @LocalServerPort
     private int port;
@@ -32,13 +31,18 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
     @BeforeEach
     void setup() {
         reservationRepository.deleteAll();
+        restClient = RestClient.builder().baseUrl(baseUrl()).build();
     }
 
     @Test
     void createReservation() {
         ReservationDto request = new ReservationDto("res1", null, null, LocalDate.now(), LocalDate.now().plusDays(2), null, com.fran.hotel.domain.model.ReservationStatus.PENDING);
 
-        ResponseEntity<ReservationDto> response = restTemplate.postForEntity(baseUrl(), request, ReservationDto.class);
+        ResponseEntity<ReservationDto> response = restClient.post()
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toEntity(ReservationDto.class);
         assertThat(response.getStatusCodeValue()).isEqualTo(201);
         assertThat(response.getBody()).isNotNull();
 
