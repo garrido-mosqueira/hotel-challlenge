@@ -20,33 +20,33 @@ import java.util.stream.Collectors;
 public class HotelServiceConfiguration {
 
     @Bean
-    public com.fran.hotel.domain.port.HotelPersistencePort hotelPersistencePort() {
-        return new com.fran.hotel.persistence.adapter.InMemoryHotelPersistenceAdapter();
+    public com.fran.hotel.domain.port.HotelPersistencePort hotelPersistencePort(com.fran.hotel.persistence.repository.HotelRepository repo) {
+        return new com.fran.hotel.persistence.adapter.HotelPersistenceAdapter(repo);
     }
 
     @Bean
-    public com.fran.hotel.domain.port.RoomPersistencePort roomPersistencePort() {
-        return new com.fran.hotel.persistence.adapter.InMemoryRoomPersistenceAdapter();
+    public com.fran.hotel.domain.port.RoomPersistencePort roomPersistencePort(com.fran.hotel.persistence.repository.RoomRepository roomRepo, com.fran.hotel.persistence.repository.HotelRepository hotelRepo) {
+        return new com.fran.hotel.persistence.adapter.RoomPersistenceAdapter(roomRepo, hotelRepo);
     }
 
     @Bean
-    public com.fran.hotel.domain.port.ReservationPersistencePort reservationPersistencePort() {
-        return new com.fran.hotel.persistence.adapter.InMemoryReservationPersistenceAdapter();
+    public com.fran.hotel.domain.port.ReservationPersistencePort reservationPersistencePort(com.fran.hotel.persistence.repository.ReservationRepository repo) {
+        return new com.fran.hotel.persistence.adapter.ReservationPersistenceAdapter(repo);
     }
 
     @Bean
-    public HotelUseCase hotelUseCase() {
-        return new com.fran.hotel.application.service.HotelService(hotelPersistencePort());
+    public HotelUseCase hotelUseCase(com.fran.hotel.domain.port.HotelPersistencePort persistence) {
+        return new com.fran.hotel.application.service.HotelService(persistence);
     }
 
     @Bean
-    public RoomUseCase roomUseCase() {
-        return new com.fran.hotel.application.service.RoomService(roomPersistencePort());
+    public RoomUseCase roomUseCase(com.fran.hotel.domain.port.RoomPersistencePort persistence) {
+        return new com.fran.hotel.application.service.RoomService(persistence);
     }
 
     @Bean
-    public ReservationUseCase reservationUseCase() {
-        return new com.fran.hotel.application.service.ReservationService(reservationPersistencePort());
+    public ReservationUseCase reservationUseCase(com.fran.hotel.domain.port.ReservationPersistencePort persistence) {
+        return new com.fran.hotel.application.service.ReservationService(persistence);
     }
 
     static class InMemoryHotelUseCase implements HotelUseCase {
