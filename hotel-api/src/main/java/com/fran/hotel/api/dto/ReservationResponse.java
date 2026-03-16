@@ -1,5 +1,9 @@
 package com.fran.hotel.api.dto;
 
+import com.fran.hotel.domain.model.Guest;
+import com.fran.hotel.domain.model.Rate;
+import com.fran.hotel.domain.model.ReservationStatus;
+import com.fran.hotel.domain.model.Room;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,11 +18,11 @@ import java.time.LocalDate;
 public class ReservationResponse {
 
     private String id;
-    private com.fran.hotel.domain.model.Guest guest;
-    private com.fran.hotel.domain.model.Room room;
+    private Guest guest;
+    private Room room;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
-    private com.fran.hotel.domain.model.Rate rate;
-    private com.fran.hotel.domain.model.ReservationStatus status;
+    private Rate rate;
+    private ReservationStatus status;
 
 }

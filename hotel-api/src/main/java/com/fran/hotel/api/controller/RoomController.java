@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/v1/hotels/{hotelId}/rooms")
+@RequestMapping("/api/hotels/{hotelId}/rooms")
 public class RoomController {
 
     private final RoomUseCase useCase;
@@ -30,15 +30,15 @@ public class RoomController {
 
     @PostMapping
     public ResponseEntity<RoomResponse> addRoom(@PathVariable String hotelId, @RequestBody RoomRequest request) {
-        Room r = new Room(request.id(), request.roomNumber(), request.type());
-        var created = useCase.addRoom(hotelId, r);
+        Room room = new Room(request.getId(), request.getRoomNumber(), request.getType());
+        var created = useCase.addRoom(hotelId, room);
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(created));
     }
 
     @PutMapping("/{roomId}")
     public ResponseEntity<RoomResponse> updateRoom(@PathVariable String hotelId, @PathVariable String roomId, @RequestBody RoomRequest request) {
-        Room r = new Room(roomId, request.roomNumber(), request.type());
-        var updated = useCase.updateRoom(hotelId, r);
+        Room room = new Room(roomId, request.getRoomNumber(), request.getType());
+        var updated = useCase.updateRoom(hotelId, room);
         return ResponseEntity.ok(mapper.toResponse(updated));
     }
 

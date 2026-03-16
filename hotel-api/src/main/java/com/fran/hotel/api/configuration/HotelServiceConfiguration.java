@@ -20,16 +20,6 @@ import java.util.stream.Collectors;
 public class HotelServiceConfiguration {
 
     @Bean
-    public RoomDTOMapper roomDTOMapper() {
-        return new RoomDTOMapper();
-    }
-
-    @Bean
-    public ReservationDTOMapper reservationDTOMapper() {
-        return new ReservationDTOMapper();
-    }
-
-    @Bean
     public HotelUseCase hotelUseCase() {
         return new InMemoryHotelUseCase();
     }
