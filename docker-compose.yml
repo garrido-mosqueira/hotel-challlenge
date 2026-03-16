@@ -1,11 +1,37 @@
 services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: testdb
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  price-challenge:
+  hotel-api:
     build:
       context: ./
       dockerfile: Dockerfile
-    volumes:
-      - ./price-api/target/price-api-1.1-SNAPSHOT.jar:/app.jar
+    # Do not mount the jar at runtime; the image contains the jar from build
     ports:
       - "8080:8080"
-    container_name: price-challenge
+    container_name: hotel-challenge
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/testdb"
+      SPRING_DATASOURCE_USERNAME: "test"
+      SPRING_DATASOURCE_PASSWORD: "test"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+
+volumes:
+  postgres-data: {}
+

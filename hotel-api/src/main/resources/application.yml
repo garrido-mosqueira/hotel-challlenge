@@ -1,11 +1,18 @@
 spring:
-  r2dbc:
-    url: r2dbc:h2:mem:///pricesdb;DB_CLOSE_DELAY=-1
-    username: sa
-    password: sa
+  datasource:
+    url: jdbc:postgresql://localhost:5432/testdb
+    username: test
+    password: test
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
   sql:
     init:
       mode: always
   h2:
     console:
-      enabled: true
+      enabled: false
+server:
+  port: 8080
