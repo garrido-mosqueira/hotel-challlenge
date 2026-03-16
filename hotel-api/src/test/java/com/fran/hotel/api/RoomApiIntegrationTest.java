@@ -13,6 +13,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -24,7 +25,8 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
     @Autowired
     private RoomRepository roomRepository;
 
-    private RestClient restClient;
+    @Autowired
+    private TestRestTemplate restTemplate;
 
     @LocalServerPort
     private int port;
@@ -35,7 +37,6 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
     void setup() {
         roomRepository.deleteAll();
         hotelRepository.deleteAll();
-        restClient = RestClient.builder().baseUrl(baseUrl(hotelRepository.save(new HotelEntity("tmp","tmp")).getId())).build();
     }
 
     @Test
@@ -45,11 +46,8 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
 
         RoomDto request = new RoomDto("r1", "101", "STANDARD");
 
-        ResponseEntity<RoomDto> response = restClient.post()
-                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .body(request)
-                .retrieve()
-                .toEntity(RoomDto.class);
+        String url = baseUrl(h.getId());
+        ResponseEntity<RoomDto> response = restTemplate.postForEntity(url, request, RoomDto.class);
         assertThat(response.getStatusCodeValue()).isEqualTo(201);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getRoomNumber()).isEqualTo("101");

@@ -3,7 +3,7 @@ package com.fran.hotel.api.controller;
 import com.fran.hotel.api.dto.ReservationDto;
 import com.fran.hotel.api.mapper.ReservationDTOMapper;
 import com.fran.hotel.domain.port.ReservationUseCase;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,12 +12,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/reservations")
 public class ReservationController {
 
     private final ReservationUseCase useCase;
     private final ReservationDTOMapper mapper;
+
+    public ReservationController(ReservationUseCase useCase, ReservationDTOMapper mapper) {
+        this.useCase = useCase;
+        this.mapper = mapper;
+    }
 
     @GetMapping
     public List<ReservationDto> getReservations(@RequestHeader(value = "X-User-Id", required = false) String userId) {
