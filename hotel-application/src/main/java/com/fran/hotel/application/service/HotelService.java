@@ -40,8 +40,8 @@ public class HotelService implements HotelUseCase {
     }
 
     @Override
-    public List<Hotel> searchHotels(String name) {
-        return persistence.findByName(name);
+    public List<Hotel> searchHotels(String city) {
+        return persistence.findByCity(city);
     }
 
 }

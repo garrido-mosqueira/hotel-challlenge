@@ -58,9 +58,9 @@ public class HotelPersistenceAdapter implements HotelPersistencePort {
     }
 
     @Override
-    @Cacheable(value = "searchCache", key = "#name")
-    public List<Hotel> findByName(String name) {
-        return hotelRepository.findByNameContainingIgnoreCase(name).stream()
+    @Cacheable(value = "searchCache", key = "#city")
+    public List<Hotel> findByCity(String city) {
+        return hotelRepository.findByCityContainingIgnoreCase(city).stream()
                 .map(hotelMapper::toDomain)
                 .toList();
     }

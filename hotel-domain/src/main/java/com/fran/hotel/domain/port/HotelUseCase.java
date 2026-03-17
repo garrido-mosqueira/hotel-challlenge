@@ -5,6 +5,7 @@ import com.fran.hotel.domain.model.Hotel;
 import java.util.List;
 
 public interface HotelUseCase {
+
     Hotel getHotel(String id);
 
     List<Hotel> getHotels();
@@ -15,5 +16,6 @@ public interface HotelUseCase {
 
     void deleteHotel(String id);
 
-    List<Hotel> searchHotels(String name);
+    List<Hotel> searchHotels(String city);
+
 }

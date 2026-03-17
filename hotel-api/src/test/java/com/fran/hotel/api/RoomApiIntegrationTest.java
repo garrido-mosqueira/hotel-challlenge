@@ -41,7 +41,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void createRoom() {
-        HotelEntity h = new HotelEntity("h10", "Hotel 10");
+        HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
         hotelRepository.save(h);
 
         RoomDto request = new RoomDto("r1", "101", "STANDARD");

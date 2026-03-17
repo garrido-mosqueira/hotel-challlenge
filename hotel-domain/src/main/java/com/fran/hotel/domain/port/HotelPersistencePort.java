@@ -5,6 +5,7 @@ import com.fran.hotel.domain.model.Hotel;
 import java.util.List;
 
 public interface HotelPersistencePort {
+
     Hotel findById(String id);
 
     List<Hotel> findAll();
@@ -13,5 +14,6 @@ public interface HotelPersistencePort {
 
     void deleteById(String id);
 
-    List<Hotel> findByName(String name);
+    List<Hotel> findByCity(String city);
+
 }

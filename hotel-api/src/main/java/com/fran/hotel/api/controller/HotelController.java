@@ -53,8 +53,8 @@ public class HotelController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<HotelDto>> searchHotels(@RequestParam String name) {
-        var hotels = useCase.searchHotels(name);
+    public ResponseEntity<List<HotelDto>> searchHotels(@RequestParam String city) {
+        var hotels = useCase.searchHotels(city);
         return ResponseEntity.ok(hotels.stream().map(mapper::toDto).toList());
     }
 

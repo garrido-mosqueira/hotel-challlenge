@@ -38,7 +38,7 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void createHotel() {
-        HotelDto request = new HotelDto("h1", "Hotel One", List.of());
+        HotelDto request = new HotelDto("h1", "Hotel One", "New York", List.of());
 
         ResponseEntity<HotelDto> response = restClient.post()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -52,12 +52,13 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
 
         HotelEntity saved = hotelRepository.findById(response.getBody().getId()).orElseThrow();
         assertThat(saved.getName()).isEqualTo("Hotel One");
+        assertThat(saved.getCity()).isEqualTo("New York");
     }
 
     @Test
     void listHotels() {
-        hotelRepository.save(new HotelEntity("h2", "Hotel 2"));
-        hotelRepository.save(new HotelEntity("h3", "Hotel 3"));
+        hotelRepository.save(new HotelEntity("h2", "Hotel 2", "Miami"));
+        hotelRepository.save(new HotelEntity("h3", "Hotel 3", "Miami"));
 
         ResponseEntity<List<HotelDto>> response = restClient.get()
                 .retrieve()
@@ -70,11 +71,11 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void searchHotels() {
-        hotelRepository.save(new HotelEntity("h4", "Beach Hotel"));
-        hotelRepository.save(new HotelEntity("h5", "Mountain Resort"));
+        hotelRepository.save(new HotelEntity("h4", "Beach Hotel", "Miami"));
+        hotelRepository.save(new HotelEntity("h5", "Mountain Resort", "Denver"));
 
         ResponseEntity<List<HotelDto>> response = restClient.get()
-                .uri("/search?name=Beach")
+                .uri("/search?city=Miami")
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<List<HotelDto>>(){});
 
@@ -82,5 +83,6 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).hasSize(1);
         assertThat(response.getBody().get(0).getName()).isEqualTo("Beach Hotel");
+        assertThat(response.getBody().get(0).getCity()).isEqualTo("Miami");
     }
 }

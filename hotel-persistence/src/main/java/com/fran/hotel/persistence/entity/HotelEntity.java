@@ -15,6 +15,7 @@ public class HotelEntity {
     @Id
     private String id;
     private String name;
+    private String city;
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<RoomEntity> rooms = new ArrayList<>();
@@ -22,9 +23,10 @@ public class HotelEntity {
     public HotelEntity() {
     }
 
-    public HotelEntity(String id, String name) {
+    public HotelEntity(String id, String name, String city) {
         this.id = id;
         this.name = name;
+        this.city = city;
     }
 
 }

@@ -31,7 +31,7 @@ public class RoomPersistenceAdapter implements RoomPersistencePort {
     public Room saveRoom(String hotelId, Room room) {
         HotelEntity hotel = hotelRepository.findById(hotelId)
                 .orElseGet(() -> {
-                    HotelEntity newHotel = new HotelEntity(hotelId, "");
+                    HotelEntity newHotel = new HotelEntity(hotelId, "", "Madrid");
                     return hotelRepository.save(newHotel);
                 });
         RoomEntity roomEntity = roomMapper.toEntity(room);
