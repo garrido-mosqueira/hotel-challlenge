@@ -12,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "hotels")
 public class HotelEntity {
+
     @Id
     private String id;
     private String name;
