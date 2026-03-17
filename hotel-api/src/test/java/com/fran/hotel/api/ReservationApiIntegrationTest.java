@@ -44,6 +44,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody()).isNotNull();
 
         ReservationEntity saved = reservationRepository.findById(response.getBody().getId()).orElseThrow();
-        assertThat(saved.getGuestId()).isEqualTo("null").isNotNull();
+        assertThat(saved.getGuestId()).isNull();
     }
+
 }

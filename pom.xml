@@ -27,8 +27,8 @@
         <price-java.version>1.1.0</price-java.version>
         <java.version>21</java.version>
         <spring-boot.version>3.2.0</spring-boot.version>
-        <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <org.lombok.version>1.18.36</org.lombok.version>
+        <mapstruct.version>1.6.2</mapstruct.version>
+        <org.lombok.version>1.18.38</org.lombok.version>
         <testcontainers.version>1.19.3</testcontainers.version>
         <rest-assured.version>5.4.0</rest-assured.version>
         <micrometer-registry-prometheus.version>1.11.1</micrometer-registry-prometheus.version>
@@ -53,21 +53,11 @@
                 <artifactId>hotel-persistence</artifactId>
                 <version>${price-java.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.fran</groupId>
-                <artifactId>virtual-threads-prices</artifactId>
-                <version>${price-java.version}</version>
-            </dependency>
 
             <!-- spring framework-->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-data-mongodb</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
             <dependency>
@@ -141,12 +131,7 @@
                 <version>${testcontainers.version}</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>mongodb</artifactId>
-                <version>${testcontainers.version}</version>
-                <scope>test</scope>
-            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

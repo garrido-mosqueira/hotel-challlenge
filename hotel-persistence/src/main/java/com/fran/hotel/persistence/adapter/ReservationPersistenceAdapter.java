@@ -1,54 +1,51 @@
 package com.fran.hotel.persistence.adapter;
 
-import com.fran.hotel.domain.model.Guest;
-import com.fran.hotel.domain.model.Rate;
 import com.fran.hotel.domain.model.Reservation;
 import com.fran.hotel.persistence.entity.ReservationEntity;
-import com.fran.hotel.persistence.repository.ReservationRepository;
 import com.fran.hotel.domain.port.ReservationPersistencePort;
+import com.fran.hotel.persistence.mapper.ReservationEntityMapper;
+import com.fran.hotel.persistence.repository.ReservationRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Repository
+@RequiredArgsConstructor
 public class ReservationPersistenceAdapter implements ReservationPersistencePort {
 
-    private final ReservationRepository repository;
-
-    public ReservationPersistenceAdapter(ReservationRepository repository) {
-        this.repository = repository;
-    }
+    private final ReservationRepository reservationRepository;
+    private final ReservationEntityMapper reservationMapper;
 
     @Override
     public List<Reservation> findByUserId(String userId) {
-        return repository.findByGuestId(userId).stream().map(this::toDomain).collect(Collectors.toList());
+        return reservationRepository.findByGuestId(userId)
+                .stream()
+                .map(reservationMapper::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override
     public Reservation findById(String id) {
-        return repository.findById(id).map(this::toDomain).orElse(null);
+        return reservationRepository.findById(id)
+                .map(reservationMapper::toDomain)
+                .orElse(null);
     }
 
     @Override
     @Transactional
     public Reservation save(Reservation reservation) {
-        ReservationEntity e = toEntity(reservation);
-        e = repository.save(e);
-        return toDomain(e);
+        ReservationEntity entity = reservationMapper.toEntity(reservation);
+        ReservationEntity saved = reservationRepository.save(entity);
+        return reservationMapper.toDomain(saved);
     }
 
     @Override
     @Transactional
     public void deleteById(String id) {
-        repository.deleteById(id);
+        reservationRepository.deleteById(id);
     }
 
-    private Reservation toDomain(ReservationEntity e) {
-        Guest guest = new Guest(e.getGuestId(), "", "", "");
-        return new Reservation(e.getId(), guest, new com.fran.hotel.domain.model.Room(e.getRoomId(), "", ""), e.getCheckInDate(), e.getCheckOutDate(), new Rate(e.getRateId(), "", null), e.getStatus());
-    }
-
-    private ReservationEntity toEntity(Reservation r) {
-        return new ReservationEntity(r.id(), r.guest() != null ? r.guest().id() : null, r.room() != null ? r.room().id() : null, r.rate() != null ? r.rate().id() : null, r.checkInDate(), r.checkOutDate(), r.status());
-    }
 }

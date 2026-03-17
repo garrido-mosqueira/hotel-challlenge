@@ -4,6 +4,8 @@ import com.fran.hotel.domain.model.Hotel;
 import com.fran.hotel.domain.port.HotelPersistencePort;
 import com.fran.hotel.domain.port.HotelUseCase;
 
+import java.util.List;
+
 public class HotelService implements HotelUseCase {
 
     private final HotelPersistencePort persistence;
@@ -15,6 +17,11 @@ public class HotelService implements HotelUseCase {
     @Override
     public Hotel getHotel(String id) {
         return persistence.findById(id);
+    }
+
+    @Override
+    public List<Hotel> getHotels() {
+        return persistence.findAll();
     }
 
     @Override

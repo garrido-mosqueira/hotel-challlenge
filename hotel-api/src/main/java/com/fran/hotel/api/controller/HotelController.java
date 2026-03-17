@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/hotels")
 public class HotelController {
@@ -24,6 +26,12 @@ public class HotelController {
         var hotel = useCase.getHotel(id);
         if (hotel == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(mapper.toDto(hotel));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<HotelDto>> listHotels() {
+        var hotels = useCase.getHotels();
+        return ResponseEntity.ok(hotels.stream().map(mapper::toDto).toList());
     }
 
     @PostMapping

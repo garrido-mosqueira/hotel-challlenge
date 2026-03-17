@@ -1,11 +1,13 @@
 package com.fran.hotel.persistence.entity;
 
+import com.fran.hotel.domain.model.ReservationStatus;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "reservations")
 public class ReservationEntity {
+
     @Id
     private String id;
 
@@ -17,7 +19,7 @@ public class ReservationEntity {
     private LocalDate checkOutDate;
 
     @Enumerated(EnumType.STRING)
-    private com.fran.hotel.domain.model.ReservationStatus status;
+    private ReservationStatus status;
 
     public ReservationEntity() {}
 
