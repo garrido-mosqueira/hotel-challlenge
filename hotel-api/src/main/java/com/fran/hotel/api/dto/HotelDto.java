@@ -1,7 +1,12 @@
 package com.fran.hotel.api.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+@Setter
+@Getter
 public class HotelDto {
     private String id;
     private String name;
@@ -15,12 +20,4 @@ public class HotelDto {
         this.rooms = rooms;
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public List<com.fran.hotel.domain.model.Room> getRooms() { return rooms; }
-    public void setRooms(List<com.fran.hotel.domain.model.Room> rooms) { this.rooms = rooms; }
 }

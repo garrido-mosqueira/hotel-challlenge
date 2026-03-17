@@ -2,13 +2,19 @@ package com.fran.hotel.persistence.entity;
 
 import com.fran.hotel.domain.model.ReservationStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "reservations")
 public class ReservationEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String guestId;
@@ -33,24 +39,4 @@ public class ReservationEntity {
         this.status = status;
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
-    public String getGuestId() { return guestId; }
-    public void setGuestId(String guestId) { this.guestId = guestId; }
-
-    public String getRoomId() { return roomId; }
-    public void setRoomId(String roomId) { this.roomId = roomId; }
-
-    public String getRateId() { return rateId; }
-    public void setRateId(String rateId) { this.rateId = rateId; }
-
-    public LocalDate getCheckInDate() { return checkInDate; }
-    public void setCheckInDate(LocalDate checkInDate) { this.checkInDate = checkInDate; }
-
-    public LocalDate getCheckOutDate() { return checkOutDate; }
-    public void setCheckOutDate(LocalDate checkOutDate) { this.checkOutDate = checkOutDate; }
-
-    public com.fran.hotel.domain.model.ReservationStatus getStatus() { return status; }
-    public void setStatus(com.fran.hotel.domain.model.ReservationStatus status) { this.status = status; }
 }

@@ -1,10 +1,14 @@
 package com.fran.hotel.persistence.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "hotels")
 public class HotelEntity {
@@ -21,30 +25,6 @@ public class HotelEntity {
     public HotelEntity(String id, String name) {
         this.id = id;
         this.name = name;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<RoomEntity> getRooms() {
-        return rooms;
-    }
-
-    public void setRooms(List<RoomEntity> rooms) {
-        this.rooms = rooms;
     }
 
 }

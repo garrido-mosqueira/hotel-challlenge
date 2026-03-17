@@ -1,8 +1,15 @@
 package com.fran.hotel.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 
+@Setter
+@Getter
 public class ReservationDto {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String id;
     private com.fran.hotel.domain.model.Guest guest;
     private com.fran.hotel.domain.model.Room room;
@@ -23,24 +30,4 @@ public class ReservationDto {
         this.status = status;
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
-    public com.fran.hotel.domain.model.Guest getGuest() { return guest; }
-    public void setGuest(com.fran.hotel.domain.model.Guest guest) { this.guest = guest; }
-
-    public com.fran.hotel.domain.model.Room getRoom() { return room; }
-    public void setRoom(com.fran.hotel.domain.model.Room room) { this.room = room; }
-
-    public LocalDate getCheckInDate() { return checkInDate; }
-    public void setCheckInDate(LocalDate checkInDate) { this.checkInDate = checkInDate; }
-
-    public LocalDate getCheckOutDate() { return checkOutDate; }
-    public void setCheckOutDate(LocalDate checkOutDate) { this.checkOutDate = checkOutDate; }
-
-    public com.fran.hotel.domain.model.Rate getRate() { return rate; }
-    public void setRate(com.fran.hotel.domain.model.Rate rate) { this.rate = rate; }
-
-    public com.fran.hotel.domain.model.ReservationStatus getStatus() { return status; }
-    public void setStatus(com.fran.hotel.domain.model.ReservationStatus status) { this.status = status; }
 }

@@ -1,7 +1,11 @@
 package com.fran.hotel.persistence.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "rooms")
 public class RoomEntity {
@@ -23,15 +27,4 @@ public class RoomEntity {
         this.hotel = hotel;
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
-    public String getRoomNumber() { return roomNumber; }
-    public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
-
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
-
-    public HotelEntity getHotel() { return hotel; }
-    public void setHotel(HotelEntity hotel) { this.hotel = hotel; }
 }

@@ -37,13 +37,16 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void createReservation() {
-        ReservationDto request = new ReservationDto("res1", null, null, LocalDate.now(), LocalDate.now().plusDays(2), null, com.fran.hotel.domain.model.ReservationStatus.PENDING);
+        ReservationDto request = new ReservationDto("provided-id", null, null, LocalDate.now(), LocalDate.now().plusDays(2), null, com.fran.hotel.domain.model.ReservationStatus.PENDING);
 
-        ResponseEntity<ReservationDto> response = restTemplate.postForEntity(baseUrl(), request, ReservationDto.class);
+        ResponseEntity<java.util.Map> response = restTemplate.postForEntity(baseUrl(), request, java.util.Map.class);
         assertThat(response.getStatusCodeValue()).isEqualTo(201);
         assertThat(response.getBody()).isNotNull();
+        String createdId = (String) response.getBody().get("id");
+        assertThat(createdId).isNotNull();
+        assertThat(createdId).isNotEqualTo("provided-id");
 
-        ReservationEntity saved = reservationRepository.findById(response.getBody().getId()).orElseThrow();
+        ReservationEntity saved = reservationRepository.findById(createdId).orElseThrow();
         assertThat(saved.getGuestId()).isNull();
     }
 

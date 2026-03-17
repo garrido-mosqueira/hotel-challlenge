@@ -11,6 +11,7 @@ public interface ReservationEntityMapper {
     @Mapping(target = "guestId", source = "guest.id")
     @Mapping(target = "roomId", source = "room.id")
     @Mapping(target = "rateId", source = "rate.id")
+    @Mapping(target = "id", source = "id", conditionExpression = "java(reservation.id() != null && !reservation.id().isBlank())")
     ReservationEntity toEntity(Reservation reservation);
 
     @Mapping(target = "guest.id", source = "guestId")
