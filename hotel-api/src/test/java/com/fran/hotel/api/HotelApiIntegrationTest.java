@@ -67,4 +67,20 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).extracting(HotelDto::getName).contains("Hotel 2", "Hotel 3");
     }
+
+    @Test
+    void searchHotels() {
+        hotelRepository.save(new HotelEntity("h4", "Beach Hotel"));
+        hotelRepository.save(new HotelEntity("h5", "Mountain Resort"));
+
+        ResponseEntity<List<HotelDto>> response = restClient.get()
+                .uri("/search?name=Beach")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<HotelDto>>(){});
+
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).hasSize(1);
+        assertThat(response.getBody().get(0).getName()).isEqualTo("Beach Hotel");
+    }
 }

@@ -39,4 +39,9 @@ public class HotelService implements HotelUseCase {
         persistence.deleteById(id);
     }
 
+    @Override
+    public List<Hotel> searchHotels(String name) {
+        return persistence.findByName(name);
+    }
+
 }

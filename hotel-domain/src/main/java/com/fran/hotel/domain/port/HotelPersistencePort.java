@@ -12,4 +12,6 @@ public interface HotelPersistencePort {
     Hotel save(Hotel hotel);
 
     void deleteById(String id);
+
+    List<Hotel> findByName(String name);
 }

@@ -14,4 +14,6 @@ public interface HotelUseCase {
     Hotel updateHotel(Hotel hotel);
 
     void deleteHotel(String id);
+
+    List<Hotel> searchHotels(String name);
 }
