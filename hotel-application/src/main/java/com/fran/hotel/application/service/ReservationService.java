@@ -31,6 +31,18 @@ public class ReservationService implements ReservationUseCase {
 
     @Override
     public void cancelReservation(String id) {
-        persistence.deleteById(id);
+        Reservation reservation = persistence.findById(id);
+        if (reservation != null) {
+            Reservation canceled = new Reservation(
+                    reservation.id(),
+                    reservation.guest(),
+                    reservation.room(),
+                    reservation.checkInDate(),
+                    reservation.checkOutDate(),
+                    reservation.rate(),
+                    com.fran.hotel.domain.model.ReservationStatus.CANCELED
+            );
+            persistence.save(canceled);
+        }
     }
 }

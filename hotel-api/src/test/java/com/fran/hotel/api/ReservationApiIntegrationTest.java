@@ -2,10 +2,12 @@ package com.fran.hotel.api;
 
 import com.fran.hotel.api.dto.ReservationDto;
 import com.fran.hotel.domain.model.Guest;
-import com.fran.hotel.domain.model.Room;
 import com.fran.hotel.domain.model.ReservationStatus;
+import com.fran.hotel.domain.model.Room;
 import com.fran.hotel.persistence.entity.ReservationEntity;
+import com.fran.hotel.persistence.entity.RoomEntity;
 import com.fran.hotel.persistence.repository.ReservationRepository;
+import com.fran.hotel.persistence.repository.RoomRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +16,11 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,6 +31,9 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private RoomRepository roomRepository;
 
     private RestClient restClient;
 
@@ -44,6 +48,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
     @BeforeEach
     void setup() {
         reservationRepository.deleteAll();
+        roomRepository.save(new RoomEntity(defaultRoom.id(), defaultRoom.roomNumber(), defaultRoom.type(), null));
         restClient = RestClient.builder().baseUrl(baseUrl()).build();
     }
 
@@ -62,7 +67,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().getFirst().getId()).isEqualTo(res1.getId());
+        assertThat(response.getBody().getFirst().getId()).isEqualTo(res1.getId().toString());
     }
 
     @Test
@@ -89,7 +94,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getId()).isEqualTo(res1.getId());
+        assertThat(response.getBody().getId()).isEqualTo(res1.getId().toString());
         assertThat(response.getBody().getGuest().id()).isEqualTo(defaultGuest.id());
     }
 
@@ -110,20 +115,20 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
     void createReservation() {
         ReservationDto request = new ReservationDto("provided-id", defaultGuest, defaultRoom, LocalDate.now(), LocalDate.now().plusDays(2), null, ReservationStatus.PENDING);
 
-        ResponseEntity<Map<String, Object>> response = restClient.post()
+        ResponseEntity<ReservationDto> response = restClient.post()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
-                .toEntity(new ParameterizedTypeReference<>() {});
+                .toEntity(ReservationDto.class);
                 
         assertThat(response.getStatusCode().value()).isEqualTo(201);
         assertThat(response.getBody()).isNotNull();
         
-        String createdId = (String) response.getBody().get("id");
+        String createdId = response.getBody().getId();
         assertThat(createdId).isNotNull();
         assertThat(createdId).isNotEqualTo("provided-id");
 
-        ReservationEntity saved = reservationRepository.findById(createdId).orElseThrow();
+        ReservationEntity saved = reservationRepository.findById(UUID.fromString(createdId)).orElseThrow();
         assertThat(saved.getGuestId()).isEqualTo(defaultGuest.id());
         assertThat(saved.getRoomId()).isEqualTo(defaultRoom.id());
     }
@@ -141,7 +146,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
         assertThat(response.getStatusCode().value()).isEqualTo(204);
         
-        ReservationEntity deleted = reservationRepository.findById(res1.getId().toString()).orElseThrow();
+        ReservationEntity deleted = reservationRepository.findById(res1.getId()).orElseThrow();
         assertThat(deleted.getStatus()).isEqualTo(com.fran.hotel.domain.model.ReservationStatus.CANCELED);
     }
 
