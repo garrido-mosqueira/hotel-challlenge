@@ -11,17 +11,17 @@ import org.springframework.context.annotation.Configuration;
 public class HotelServiceConfiguration {
 
     @Bean
-    public HotelService hotelUseCase(HotelPersistencePort persistence) {
+    public HotelUseCase hotelUseCase(HotelPersistencePort persistence) {
         return new HotelService(persistence);
     }
 
     @Bean
-    public RoomService roomUseCase(RoomPersistencePort persistence) {
+    public RoomUseCase roomUseCase(RoomPersistencePort persistence) {
         return new RoomService(persistence);
     }
 
     @Bean
-    public ReservationService reservationUseCase(ReservationPersistencePort persistence) {
+    public ReservationUseCase reservationUseCase(ReservationPersistencePort persistence) {
         return new ReservationService(persistence);
     }
 
