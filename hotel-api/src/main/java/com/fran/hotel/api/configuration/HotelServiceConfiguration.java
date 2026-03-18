@@ -21,8 +21,8 @@ public class HotelServiceConfiguration {
     }
 
     @Bean
-    public ReservationUseCase reservationUseCase(ReservationPersistencePort persistence) {
-        return new ReservationService(persistence);
+    public ReservationUseCase reservationUseCase(ReservationPersistencePort persistence, ReservationPaymentPort paymentPort) {
+        return new ReservationService(persistence, paymentPort);
     }
 
 }

@@ -2,7 +2,8 @@ package com.fran.hotel.persistence.adapter;
 
 import com.fran.hotel.domain.model.Reservation;
 import com.fran.hotel.domain.model.ReservationStatus;
-import com.fran.hotel.domain.model.ReservationTask;
+import com.fran.hotel.domain.model.ReservationPayment;
+import com.fran.hotel.domain.port.ReservationPaymentPort;
 import com.fran.hotel.domain.port.ReservationPersistencePort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,62 +12,61 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RedisReservationPaymentSimulation {
+public class RedisReservationPaymentSimulation implements ReservationPaymentPort {
 
     private static final Logger log = LoggerFactory.getLogger(RedisReservationPaymentSimulation.class);
-    private static final String PROGRESS_REGISTER_PREFIX = "reservation:task:";
+    private static final String PROGRESS_REGISTER_PREFIX = "reservation:reservationpayment:";
     private static final int MAX_PROGRESS = 60;
 
-    private final RedisTemplate<String, ReservationTask> progressRegister;
+    private final RedisTemplate<String, ReservationPayment> progressRegister;
     private final ReservationPersistencePort persistencePort;
 
-    public RedisReservationPaymentSimulation(@Qualifier("reservationTaskTemplate") RedisTemplate<String, ReservationTask> progressRegister,
+    public RedisReservationPaymentSimulation(RedisTemplate<String, ReservationPayment> progressRegister,
                                              ReservationPersistencePort persistencePort) {
         this.progressRegister = progressRegister;
         this.persistencePort = persistencePort;
     }
 
-    public Reservation executeTask(Reservation reservation) {
-        String taskKey = PROGRESS_REGISTER_PREFIX + reservation.id();
+    @Override
+    public Reservation executeReservationPayment(Reservation reservation) {
+        String paymentKey = PROGRESS_REGISTER_PREFIX + reservation.id();
 
-        if (getTaskThread(taskKey) != null) {
+        if (getReservationPaymentByKey(paymentKey) != null) {
             log.info("Reservation payment '{}' is in process", reservation.id());
             return reservation;
         }
 
         log.info("Starting reservation payment '{}'", reservation.id());
-        Thread.ofVirtual()
-                .name(reservation.id())
-                .start(() -> runLoop(reservation));
+        Thread.ofVirtual().name(reservation.id()).start(() -> simulatePaymentProgress(reservation));
 
         return reservation;
     }
 
-    public void cancelTask(Long reservationId) {
-        String taskKey = PROGRESS_REGISTER_PREFIX + reservationId;
-        ReservationTask taskThread = getTaskThread(taskKey);
+    @Override
+    public void cancelReservationPayment(String reservationId) {
+        String paymentKey = PROGRESS_REGISTER_PREFIX + reservationId;
+        ReservationPayment reservationPayment = getReservationPaymentByKey(paymentKey);
 
-        if (taskThread != null && taskThread.reservation() != null && !taskThread.isCancelled()) {
+        if (reservationPayment != null && reservationPayment.reservation() != null && !reservationPayment.isCancelled()) {
             log.info("Cancel reservation payment '{}'", reservationId);
-            progressRegister.opsForValue().set(taskKey, new ReservationTask(taskThread.reservation(), true, taskThread.progress()));
+            progressRegister.opsForValue().set(paymentKey, new ReservationPayment(reservationPayment.reservation(), true, reservationPayment.progress()));
         } else {
             log.info("Reservation payment '{}' is already cancelled", reservationId);
         }
     }
 
-    private void runLoop(Reservation reservation) {
-        String taskKey = PROGRESS_REGISTER_PREFIX + reservation.id();
+    private void simulatePaymentProgress(Reservation reservation) {
+        String paymentKey = PROGRESS_REGISTER_PREFIX + reservation.id();
         Reservation runningReservation = reservation.withStatus(ReservationStatus.PENDING);
 
-        updateTaskInRegister(taskKey, new ReservationTask(runningReservation, false, 0));
+        updateReservationStatus(paymentKey, new ReservationPayment(runningReservation, false, 0));
         persistencePort.save(runningReservation);
 
         int progress = 0;
-        ReservationTask currentTask = null;
-
+        ReservationPayment currentPayment = null;
         do {
-            ReservationTask updatedTask = new ReservationTask(runningReservation, false, progress);
-            updateTaskInRegister(taskKey, updatedTask);
+            ReservationPayment updatedReservation = new ReservationPayment(runningReservation, false, progress);
+            updateReservationStatus(paymentKey, updatedReservation);
 
             try {
                 Thread.sleep(1000);
@@ -76,20 +76,20 @@ public class RedisReservationPaymentSimulation {
             }
 
             progress++;
-            currentTask = getTaskThread(taskKey);
-        } while (progress <= MAX_PROGRESS && currentTask != null && !currentTask.isCancelled());
+            currentPayment = getReservationPaymentByKey(paymentKey);
+        } while (progress <= MAX_PROGRESS && currentPayment != null && !currentPayment.isCancelled());
 
-        finalizePaymentProgress(runningReservation, progress, currentTask);
-        progressRegister.delete(taskKey);
-        log.info("End counter for reservation task '{}'", runningReservation.id());
+        finalizePaymentProgress(runningReservation, progress, currentPayment);
+        progressRegister.delete(paymentKey);
+        log.info("End payment reservation process for '{}'", runningReservation.id());
     }
 
-    private void updateTaskInRegister(String taskKey, ReservationTask task) {
-        progressRegister.opsForValue().set(taskKey, task);
+    private void updateReservationStatus(String paymentKey, ReservationPayment reservationPayment) {
+        progressRegister.opsForValue().set(paymentKey, reservationPayment);
     }
 
-    private void finalizePaymentProgress(Reservation reservation, int finalProgress, ReservationTask currentTask) {
-        if (currentTask != null && currentTask.isCancelled()) {
+    private void finalizePaymentProgress(Reservation reservation, int finalProgress, ReservationPayment currentPayment) {
+        if (currentPayment != null && currentPayment.isCancelled()) {
             Reservation cancelledReservation = reservation.withStatus(ReservationStatus.CANCELLED);
             persistencePort.save(cancelledReservation);
         } else if (finalProgress > MAX_PROGRESS) {
@@ -99,7 +99,7 @@ public class RedisReservationPaymentSimulation {
     }
 
 
-    private ReservationTask getTaskThread(String key) {
+    private ReservationPayment getReservationPaymentByKey(String key) {
         return progressRegister.opsForValue().get(key);
     }
 }

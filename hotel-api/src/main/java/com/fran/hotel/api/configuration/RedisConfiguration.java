@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fran.hotel.domain.model.ReservationTask;
+import com.fran.hotel.domain.model.ReservationPayment;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,8 +50,8 @@ public class RedisConfiguration {
     }
 
     @Bean
-    public RedisTemplate<String, ReservationTask> reservationTaskTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, ReservationTask> template = new RedisTemplate<>();
+    public RedisTemplate<String, ReservationPayment> reservationPaymentTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, ReservationPayment> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
         template.setKeySerializer(new StringRedisSerializer());
@@ -60,8 +60,8 @@ public class RedisConfiguration {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
-        Jackson2JsonRedisSerializer<ReservationTask> serializer =
-            new Jackson2JsonRedisSerializer<>(objectMapper, ReservationTask.class);
+        Jackson2JsonRedisSerializer<ReservationPayment> serializer =
+            new Jackson2JsonRedisSerializer<>(objectMapper, ReservationPayment.class);
 
         template.setValueSerializer(serializer);
         template.setHashValueSerializer(serializer);
