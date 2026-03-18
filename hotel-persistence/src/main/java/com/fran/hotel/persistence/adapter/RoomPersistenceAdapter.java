@@ -11,6 +11,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.UUID;
+
 @Repository
 @RequiredArgsConstructor
 public class RoomPersistenceAdapter implements RoomPersistencePort {
@@ -21,9 +24,16 @@ public class RoomPersistenceAdapter implements RoomPersistencePort {
 
     @Override
     public Room findByHotelIdAndRoomId(String hotelId, String roomId) {
-        RoomEntity roomEntity = roomRepository.findByHotelIdAndRoomId(hotelId, roomId);
+        RoomEntity roomEntity = roomRepository.findByHotelIdAndRoomId(hotelId, UUID.fromString(roomId));
         if (roomEntity == null) return null;
         return roomMapper.toDomain(roomEntity);
+    }
+
+    @Override
+    public List<Room> findByHotelId(String hotelId) {
+        return roomRepository.findByHotelId(hotelId).stream()
+                .map(roomMapper::toDomain)
+                .toList();
     }
 
     @Override
@@ -43,7 +53,7 @@ public class RoomPersistenceAdapter implements RoomPersistencePort {
     @Override
     @Transactional
     public void deleteRoom(String hotelId, String roomId) {
-        RoomEntity roomEntity = roomRepository.findByHotelIdAndRoomId(hotelId, roomId);
+        RoomEntity roomEntity = roomRepository.findByHotelIdAndRoomId(hotelId, UUID.fromString(roomId));
         if (roomEntity != null) {
             roomRepository.delete(roomEntity);
         }

@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/hotels/{hotelId}/rooms")
 public class RoomController {
@@ -18,6 +20,12 @@ public class RoomController {
     public RoomController(RoomUseCase useCase, RoomDTOMapper mapper) {
         this.useCase = useCase;
         this.mapper = mapper;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<RoomDto>> getRooms(@PathVariable String hotelId) {
+        var rooms = useCase.getRooms(hotelId);
+        return ResponseEntity.ok(rooms.stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/{roomId}")

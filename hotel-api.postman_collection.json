@@ -13,6 +13,15 @@
       "name": "Hotels",
       "item": [
         {
+          "name": "List Hotels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/hotels", "host": ["{{baseUrl}}"], "path": ["api","hotels"] }
+          },
+          "response": []
+        },
+        {
           "name": "Get Hotel",
           "request": {
             "method": "GET",
@@ -79,11 +88,20 @@
       "name": "Rooms",
       "item": [
         {
+          "name": "List Rooms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/hotels/:hotelId/rooms", "host": ["{{baseUrl}}"], "path": ["api","hotels",":hotelId","rooms"], "variable": [{"key": "hotelId", "value": "h1"}] }
+          },
+          "response": []
+        },
+        {
           "name": "Get Room",
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/hotels/:hotelId/rooms/:id", "host": ["{{baseUrl}}"], "path": ["api","hotels",":hotelId","rooms",":id"], "variable": [{"key": "hotelId", "value": "h1"}, {"key": "id", "value": "r1"}] }
+            "url": { "raw": "{{baseUrl}}/api/hotels/:hotelId/rooms/:id", "host": ["{{baseUrl}}"], "path": ["api","hotels",":hotelId","rooms",":id"], "variable": [{"key": "hotelId", "value": "h1"}, {"key": "id", "value": "35832746-9214-4190-8e10-91a520973a9e"}] }
           },
           "response": []
         },
@@ -92,18 +110,18 @@
           "request": {
             "method": "POST",
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
-            "body": { "mode": "raw", "raw": "{\n  \"id\": \"r1\",\n  \"roomNumber\": \"101\",\n  \"type\": \"STANDARD\"\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"roomNumber\": \"101\",\n  \"type\": \"STANDARD\"\n}" },
             "url": { "raw": "{{baseUrl}}/api/hotels/:hotelId/rooms", "host": ["{{baseUrl}}"], "path": ["api","hotels",":hotelId","rooms"], "variable": [{"key": "hotelId", "value": "h1"}] }
           },
-          "response": [ { "name": "201 Created", "status": "Created", "code": 201, "body": "{ \"id\": \"r1\", \"roomNumber\": \"101\", \"type\": \"STANDARD\" }" } ]
+          "response": [ { "name": "201 Created", "status": "Created", "code": 201, "body": "{ \"id\": \"35832746-9214-4190-8e10-91a520973a9e\", \"roomNumber\": \"101\", \"type\": \"STANDARD\" }" } ]
         },
         {
           "name": "Update Room",
           "request": {
             "method": "PUT",
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
-            "body": { "mode": "raw", "raw": "{\n  \"id\": \"r1\",\n  \"roomNumber\": \"102\",\n  \"type\": \"DELUXE\"\n}" },
-            "url": { "raw": "{{baseUrl}}/api/hotels/:hotelId/rooms/:id", "host": ["{{baseUrl}}"], "path": ["api","hotels",":hotelId","rooms",":id"], "variable": [{"key": "hotelId", "value": "h1"}, {"key": "id", "value": "r1"}] }
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"35832746-9214-4190-8e10-91a520973a9e\",\n  \"roomNumber\": \"102\",\n  \"type\": \"DELUXE\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/hotels/:hotelId/rooms/:id", "host": ["{{baseUrl}}"], "path": ["api","hotels",":hotelId","rooms",":id"], "variable": [{"key": "hotelId", "value": "h1"}, {"key": "id", "value": "35832746-9214-4190-8e10-91a520973a9e"}] }
           },
           "response": []
         },
@@ -112,7 +130,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/hotels/:hotelId/rooms/:id", "host": ["{{baseUrl}}"], "path": ["api","hotels",":hotelId","rooms",":id"], "variable": [{"key": "hotelId", "value": "h1"}, {"key": "id", "value": "r1"}] }
+            "url": { "raw": "{{baseUrl}}/api/hotels/:hotelId/rooms/:id", "host": ["{{baseUrl}}"], "path": ["api","hotels",":hotelId","rooms",":id"], "variable": [{"key": "hotelId", "value": "h1"}, {"key": "id", "value": "35832746-9214-4190-8e10-91a520973a9e"}] }
           },
           "response": []
         }
@@ -122,7 +140,7 @@
       "name": "Reservations",
       "item": [
         {
-          "name": "List Reservations (user)",
+          "name": "List Reservations",
           "request": {
             "method": "GET",
             "header": [ { "key": "X-User-Id", "value": "user-1" } ],
@@ -135,7 +153,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/reservations/:id", "host": ["{{baseUrl}}"], "path": ["api","reservations",":id"], "variable": [{"key": "id", "value": "res1"}] }
+            "url": { "raw": "{{baseUrl}}/api/reservations/:id", "host": ["{{baseUrl}}"], "path": ["api","reservations",":id"], "variable": [{"key": "id", "value": "670878e3-a30a-4720-8025-a134a4752c1e"}] }
           },
           "response": []
         },
@@ -146,18 +164,18 @@
             "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "X-User-Id", "value": "user-1" } ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": \"res1\",\n  \"guestId\": \"guest-1\",\n  \"roomId\": \"r1\",\n  \"checkInDate\": \"2026-03-20\",\n  \"checkOutDate\": \"2026-03-22\",\n  \"status\": \"PENDING\"\n}"
+              "raw": "{\n  \"guestId\": \"guest-1\",\n  \"roomId\": \"35832746-9214-4190-8e10-91a520973a9e\",\n  \"checkInDate\": \"2026-03-20\",\n  \"checkOutDate\": \"2026-03-22\",\n  \"status\": \"PENDING\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/api/reservations", "host": ["{{baseUrl}}"], "path": ["api","reservations"] }
           },
-          "response": [ { "name": "201 Created", "status": "Created", "code": 201, "body": "{ \"id\": \"res1\", \"status\": \"PENDING\" }" } ]
+          "response": [ { "name": "201 Created", "status": "Created", "code": 201, "body": "{ \"id\": \"670878e3-a30a-4720-8025-a134a4752c1e\", \"status\": \"PENDING\" }" } ]
         },
         {
           "name": "Cancel Reservation",
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/reservations/:id", "host": ["{{baseUrl}}"], "path": ["api","reservations",":id"], "variable": [{"key": "id", "value": "res1"}] }
+            "url": { "raw": "{{baseUrl}}/api/reservations/:id", "host": ["{{baseUrl}}"], "path": ["api","reservations",":id"], "variable": [{"key": "id", "value": "670878e3-a30a-4720-8025-a134a4752c1e"}] }
           },
           "response": []
         }

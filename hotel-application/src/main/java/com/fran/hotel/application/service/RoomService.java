@@ -4,8 +4,10 @@ import com.fran.hotel.domain.model.Room;
 import com.fran.hotel.domain.port.RoomPersistencePort;
 import com.fran.hotel.domain.port.RoomUseCase;
 
-public class RoomService implements RoomUseCase {
+import java.util.List;
 
+public class RoomService implements RoomUseCase {
+    
     private final RoomPersistencePort persistence;
 
     public RoomService(RoomPersistencePort persistence) {
@@ -15,6 +17,11 @@ public class RoomService implements RoomUseCase {
     @Override
     public Room getRoom(String hotelId, String roomId) {
         return persistence.findByHotelIdAndRoomId(hotelId, roomId);
+    }
+
+    @Override
+    public List<Room> getRooms(String hotelId) {
+        return persistence.findByHotelId(hotelId);
     }
 
     @Override

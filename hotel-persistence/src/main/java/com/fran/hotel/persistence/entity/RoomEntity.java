@@ -4,13 +4,16 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Setter
 @Getter
 @Entity
 @Table(name = "rooms")
 public class RoomEntity {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     private String roomNumber;
     private String type;
 
@@ -20,7 +23,7 @@ public class RoomEntity {
 
     public RoomEntity() {}
 
-    public RoomEntity(String id, String roomNumber, String type, HotelEntity hotel) {
+    public RoomEntity(UUID id, String roomNumber, String type, HotelEntity hotel) {
         this.id = id;
         this.roomNumber = roomNumber;
         this.type = type;

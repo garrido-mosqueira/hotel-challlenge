@@ -41,21 +41,22 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
     private int port;
 
     private final Guest defaultGuest = new Guest("user-1", "John", "Doe", "john.doe@example.com");
-    private final Room defaultRoom = new Room("r1", "101", "Standard");
+    private final String roomId = UUID.randomUUID().toString();
+    private final Room defaultRoom = new Room(roomId, "101", "Standard");
 
     private String baseUrl() { return "http://localhost:" + port + "/api/reservations"; }
 
     @BeforeEach
     void setup() {
         reservationRepository.deleteAll();
-        roomRepository.save(new RoomEntity(defaultRoom.id(), defaultRoom.roomNumber(), defaultRoom.type(), null));
+        roomRepository.save(new RoomEntity(UUID.fromString(defaultRoom.id()), defaultRoom.roomNumber(), defaultRoom.type(), null));
         restClient = RestClient.builder().baseUrl(baseUrl()).build();
     }
 
     @Test
     void getReservationsForUser() {
         ReservationEntity res1 = new ReservationEntity(null, defaultGuest.id(), defaultRoom.id(), null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
-        ReservationEntity res2 = new ReservationEntity(null, "user-2", "r2", null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
+        ReservationEntity res2 = new ReservationEntity(null, "user-2", UUID.randomUUID().toString(), null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
         reservationRepository.saveAll(List.of(res1, res2));
         reservationRepository.flush();
 

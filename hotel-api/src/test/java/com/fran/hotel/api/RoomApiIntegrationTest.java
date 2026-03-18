@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
@@ -42,15 +44,34 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
     }
 
     @Test
+    void getRooms() {
+        HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
+        h = hotelRepository.save(h);
+
+        RoomEntity r1 = new RoomEntity(null, "101", "STANDARD", h);
+        RoomEntity r2 = new RoomEntity(null, "102", "DELUXE", h);
+        roomRepository.saveAll(List.of(r1, r2));
+
+        ResponseEntity<List<RoomDto>> response = restClient.get()
+                .uri(baseUrl(h.getId()))
+                .retrieve()
+                .toEntity(new org.springframework.core.ParameterizedTypeReference<>() {});
+
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).hasSize(2);
+    }
+
+    @Test
     void getRoom() {
         HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
         
-        RoomEntity room = new RoomEntity("r1", "101", "STANDARD", h);
-        roomRepository.save(room);
+        RoomEntity room = new RoomEntity(null, "101", "STANDARD", h);
+        room = roomRepository.save(room);
 
         ResponseEntity<RoomDto> response = restClient.get()
-                .uri(baseUrl(h.getId()) + "/r1")
+                .uri(baseUrl(h.getId()) + "/" + room.getId().toString())
                 .retrieve()
                 .toEntity(RoomDto.class);
 
@@ -67,7 +88,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity finalH = h;
         HttpClientErrorException exception = catchThrowableOfType(() ->
                 restClient.get()
-                        .uri(baseUrl(finalH.getId()) + "/unknown-room")
+                        .uri(baseUrl(finalH.getId()) + "/" + java.util.UUID.randomUUID().toString())
                         .retrieve()
                         .toBodilessEntity(),
                 HttpClientErrorException.class
@@ -77,11 +98,37 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
     }
 
     @Test
+    void createRoomAutoGenerateId() {
+        HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
+        hotelRepository.save(h);
+
+        // Sending a room without an ID
+        RoomDto request = new RoomDto(null, "101", "STANDARD");
+
+        ResponseEntity<RoomDto> response = restClient.post()
+                .uri(baseUrl(h.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toEntity(RoomDto.class);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(201);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getId()).isNotNull(); // Expecting an auto-generated ID
+        assertThat(response.getBody().getRoomNumber()).isEqualTo("101");
+
+        RoomEntity saved = roomRepository.findByHotelIdAndRoomId(h.getId(), java.util.UUID.fromString(response.getBody().getId()));
+        assertThat(saved).isNotNull();
+        assertThat(saved.getRoomNumber()).isEqualTo("101");
+    }
+
+    @Test
     void createRoom() {
         HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
         hotelRepository.save(h);
 
-        RoomDto request = new RoomDto("r1", "101", "STANDARD");
+        String customId = java.util.UUID.randomUUID().toString();
+        RoomDto request = new RoomDto(customId, "101", "STANDARD");
 
         ResponseEntity<RoomDto> response = restClient.post()
                 .uri(baseUrl(h.getId()))
@@ -94,7 +141,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getRoomNumber()).isEqualTo("101");
 
-        RoomEntity saved = roomRepository.findByHotelIdAndRoomId(h.getId(), response.getBody().getId());
+        RoomEntity saved = roomRepository.findByHotelIdAndRoomId(h.getId(), java.util.UUID.fromString(response.getBody().getId()));
         assertThat(saved).isNotNull();
         assertThat(saved.getRoomNumber()).isEqualTo("101");
     }
@@ -104,13 +151,14 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
         
-        RoomEntity room = new RoomEntity("r1", "101", "STANDARD", h);
-        roomRepository.save(room);
+        RoomEntity room = new RoomEntity(null, "101", "STANDARD", h);
+        room = roomRepository.save(room);
 
-        RoomDto request = new RoomDto("r1", "102", "DELUXE");
+        String roomId = room.getId().toString();
+        RoomDto request = new RoomDto(roomId, "102", "DELUXE");
 
         ResponseEntity<RoomDto> response = restClient.put()
-                .uri(baseUrl(h.getId()) + "/r1")
+                .uri(baseUrl(h.getId()) + "/" + roomId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
@@ -121,7 +169,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody().getRoomNumber()).isEqualTo("102");
         assertThat(response.getBody().getType()).isEqualTo("DELUXE");
 
-        RoomEntity updated = roomRepository.findByHotelIdAndRoomId(h.getId(), "r1");
+        RoomEntity updated = roomRepository.findByHotelIdAndRoomId(h.getId(), room.getId());
         assertThat(updated).isNotNull();
         assertThat(updated.getRoomNumber()).isEqualTo("102");
     }
@@ -131,15 +179,16 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
         
-        RoomEntity room = new RoomEntity("r1", "101", "STANDARD", h);
-        roomRepository.save(room);
+        RoomEntity room = new RoomEntity(null, "101", "STANDARD", h);
+        room = roomRepository.save(room);
 
+        String roomId = room.getId().toString();
         ResponseEntity<Void> response = restClient.delete()
-                .uri(baseUrl(h.getId()) + "/r1")
+                .uri(baseUrl(h.getId()) + "/" + roomId)
                 .retrieve()
                 .toBodilessEntity();
 
         assertThat(response.getStatusCode().value()).isEqualTo(204);
-        assertThat(roomRepository.findByHotelIdAndRoomId(h.getId(), "r1")).isNull();
+        assertThat(roomRepository.findByHotelIdAndRoomId(h.getId(), room.getId())).isNull();
     }
 }
