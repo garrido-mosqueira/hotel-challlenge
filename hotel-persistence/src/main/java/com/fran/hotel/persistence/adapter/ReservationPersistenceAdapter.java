@@ -1,8 +1,8 @@
 package com.fran.hotel.persistence.adapter;
 
 import com.fran.hotel.domain.model.Reservation;
-import com.fran.hotel.persistence.entity.ReservationEntity;
 import com.fran.hotel.domain.port.ReservationPersistencePort;
+import com.fran.hotel.persistence.entity.ReservationEntity;
 import com.fran.hotel.persistence.mapper.ReservationEntityMapper;
 import com.fran.hotel.persistence.repository.ReservationRepository;
 import jakarta.transaction.Transactional;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class ReservationPersistenceAdapter implements ReservationPersistencePort
         return reservationRepository.findByGuestId(userId)
                 .stream()
                 .map(reservationMapper::toDomain)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

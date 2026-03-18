@@ -3,13 +3,11 @@ package com.fran.hotel.api.controller;
 import com.fran.hotel.api.dto.ReservationDto;
 import com.fran.hotel.api.mapper.ReservationDTOMapper;
 import com.fran.hotel.domain.port.ReservationUseCase;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -25,9 +23,8 @@ public class ReservationController {
 
     @GetMapping
     public List<ReservationDto> getReservations(@RequestHeader(value = "X-User-Id", required = false) String userId) {
-        // for demo, if no header provided, return empty
         if (userId == null) return List.of();
-        return useCase.getReservationsForUser(userId).stream().map(mapper::toDto).collect(Collectors.toList());
+        return useCase.getReservationsForUser(userId).stream().map(mapper::toDto).toList();
     }
 
     @GetMapping("/{id}")

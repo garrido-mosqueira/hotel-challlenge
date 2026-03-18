@@ -1,6 +1,7 @@
 package com.fran.hotel.application.service;
 
 import com.fran.hotel.domain.model.Reservation;
+import com.fran.hotel.domain.model.ReservationStatus;
 import com.fran.hotel.domain.port.ReservationPersistencePort;
 import com.fran.hotel.domain.port.ReservationUseCase;
 
@@ -33,15 +34,7 @@ public class ReservationService implements ReservationUseCase {
     public void cancelReservation(String id) {
         Reservation reservation = persistence.findById(id);
         if (reservation != null) {
-            Reservation canceled = new Reservation(
-                    reservation.id(),
-                    reservation.guest(),
-                    reservation.room(),
-                    reservation.checkInDate(),
-                    reservation.checkOutDate(),
-                    reservation.rate(),
-                    com.fran.hotel.domain.model.ReservationStatus.CANCELED
-            );
+            Reservation canceled = reservation.withStatus(ReservationStatus.CANCELLED);
             persistence.save(canceled);
         }
     }

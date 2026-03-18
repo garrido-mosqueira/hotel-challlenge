@@ -148,7 +148,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getStatusCode().value()).isEqualTo(204);
         
         ReservationEntity deleted = reservationRepository.findById(res1.getId()).orElseThrow();
-        assertThat(deleted.getStatus()).isEqualTo(com.fran.hotel.domain.model.ReservationStatus.CANCELED);
+        assertThat(deleted.getStatus()).isEqualTo(ReservationStatus.CANCELLED);
     }
 
 }
