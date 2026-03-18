@@ -1,9 +1,6 @@
 package com.fran.hotel.api.dto;
 
-import com.fran.hotel.domain.model.Guest;
-import com.fran.hotel.domain.model.Rate;
 import com.fran.hotel.domain.model.ReservationStatus;
-import com.fran.hotel.domain.model.Room;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,22 +11,20 @@ import java.time.LocalDate;
 public class ReservationDto {
 
     private String id;
-    private Guest guest;
-    private Room room;
+    private String guestId;
+    private String roomId;
+    private String rateId;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
-    private Rate rate;
     private ReservationStatus status;
 
-    public ReservationDto() {}
-
-    public ReservationDto(String id, Guest guest, Room room, LocalDate checkInDate, LocalDate checkOutDate, Rate rate, ReservationStatus status) {
+    public ReservationDto(String id, String guestId, String roomId, String rateId, LocalDate checkInDate, LocalDate checkOutDate, ReservationStatus status) {
         this.id = id;
-        this.guest = guest;
-        this.room = room;
+        this.guestId = guestId;
+        this.roomId = roomId;
+        this.rateId = rateId;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
-        this.rate = rate;
         this.status = status;
     }
 

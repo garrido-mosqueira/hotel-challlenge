@@ -40,28 +40,28 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
     @LocalServerPort
     private int port;
 
-    private final Guest defaultGuest = new Guest("user-1", "John", "Doe", "john.doe@example.com");
-    private final String roomId = UUID.randomUUID().toString();
-    private final Room defaultRoom = new Room(roomId, "101", "Standard");
+    private final Guest defaultGuest = new Guest(1L, "John", "Doe", "john.doe@example.com");
+    private final String roomIdStr = UUID.randomUUID().toString();
+    private final Room defaultRoom = new Room(null, 1L, "STANDARD_TYPE", 1, "101", "Standard Room", true);
 
     private String baseUrl() { return "http://localhost:" + port + "/api/reservations"; }
 
     @BeforeEach
     void setup() {
         reservationRepository.deleteAll();
-        roomRepository.save(new RoomEntity(UUID.fromString(defaultRoom.id()), defaultRoom.roomNumber(), defaultRoom.type(), null));
+        roomRepository.save(new RoomEntity(UUID.randomUUID(), "101", "STANDARD_TYPE", null));
         restClient = RestClient.builder().baseUrl(baseUrl()).build();
     }
 
     @Test
     void getReservationsForUser() {
-        ReservationEntity res1 = new ReservationEntity(null, defaultGuest.id(), defaultRoom.id(), null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
+        ReservationEntity res1 = new ReservationEntity(null, String.valueOf(defaultGuest.guestId()), roomIdStr, null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
         ReservationEntity res2 = new ReservationEntity(null, "user-2", UUID.randomUUID().toString(), null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
         reservationRepository.saveAll(List.of(res1, res2));
         reservationRepository.flush();
 
         ResponseEntity<List<ReservationDto>> response = restClient.get()
-                .header("X-User-Id", defaultGuest.id())
+                .header("X-User-Id", String.valueOf(defaultGuest.guestId()))
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<>() {});
 
@@ -84,7 +84,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void getReservation() {
-        ReservationEntity res1 = new ReservationEntity(null, defaultGuest.id(), defaultRoom.id(), null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
+        ReservationEntity res1 = new ReservationEntity(null, String.valueOf(defaultGuest.guestId()), roomIdStr, null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
         reservationRepository.save(res1);
         reservationRepository.flush();
 
@@ -96,7 +96,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getId()).isEqualTo(res1.getId().toString());
-        assertThat(response.getBody().getGuest().id()).isEqualTo(defaultGuest.id());
+        assertThat(response.getBody().getGuestId()).isEqualTo(String.valueOf(defaultGuest.guestId()));
     }
 
     @Test
@@ -114,7 +114,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void createReservation() {
-        ReservationDto request = new ReservationDto("provided-id", defaultGuest, defaultRoom, LocalDate.now(), LocalDate.now().plusDays(2), null, ReservationStatus.PENDING);
+        ReservationDto request = new ReservationDto("provided-id", String.valueOf(defaultGuest.guestId()), roomIdStr, null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
 
         ResponseEntity<ReservationDto> response = restClient.post()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -130,13 +130,13 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
         assertThat(createdId).isNotEqualTo("provided-id");
 
         ReservationEntity saved = reservationRepository.findById(UUID.fromString(createdId)).orElseThrow();
-        assertThat(saved.getGuestId()).isEqualTo(defaultGuest.id());
-        assertThat(saved.getRoomId()).isEqualTo(defaultRoom.id());
+        assertThat(saved.getGuestId()).isEqualTo(String.valueOf(defaultGuest.guestId()));
+        assertThat(saved.getRoomId()).isEqualTo(roomIdStr);
     }
 
     @Test
     void cancelReservation() {
-        ReservationEntity res1 = new ReservationEntity(null, defaultGuest.id(), defaultRoom.id(), null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
+        ReservationEntity res1 = new ReservationEntity(null, String.valueOf(defaultGuest.guestId()), roomIdStr, null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
         reservationRepository.save(res1);
         reservationRepository.flush();
 

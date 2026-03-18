@@ -12,20 +12,30 @@ import java.util.UUID;
 public interface RoomEntityMapper {
 
     @Mapping(target = "hotel", ignore = true)
-    @Mapping(target = "id", source = "id", qualifiedByName = "stringToUuid")
+    @Mapping(target = "id", source = "roomId", qualifiedByName = "longToUuid")
+    @Mapping(target = "type", source = "roomTypeId")
+    @Mapping(target = "roomNumber", source = "number")
     RoomEntity toEntity(Room room);
 
-    @Mapping(target = "id", source = "id", qualifiedByName = "uuidToString")
+    @Mapping(target = "roomId", source = "id", qualifiedByName = "uuidToLong")
+    @Mapping(target = "roomTypeId", source = "type")
+    @Mapping(target = "number", source = "roomNumber")
+    // Map missing fields if needed, ignoring for now as they might not be in entity
+    @Mapping(target = "hotelId", ignore = true)
+    @Mapping(target = "floor", ignore = true)
+    @Mapping(target = "name", ignore = true)
+    @Mapping(target = "isAvailable", ignore = true)
     Room toDomain(RoomEntity roomEntity);
 
-    @Named("stringToUuid")
-    default UUID stringToUuid(String id) {
-        return id != null ? UUID.fromString(id) : null;
+    @Named("longToUuid")
+    default UUID longToUuid(Long id) {
+        if (id == null) return null;
+        return new UUID(0L, id);
     }
 
-    @Named("uuidToString")
-    default String uuidToString(UUID id) {
-        return id != null ? id.toString() : null;
+    @Named("uuidToLong")
+    default Long uuidToLong(UUID id) {
+        return id != null ? id.getLeastSignificantBits() : null;
     }
 
 }

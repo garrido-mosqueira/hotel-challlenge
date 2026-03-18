@@ -1,27 +1,22 @@
 package com.fran.hotel.api.dto;
 
-import com.fran.hotel.domain.model.Room;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 @Setter
 @Getter
 public class HotelDto {
 
-    private String id;
+    private Long hotelId;
     private String name;
+    private String address;
     private String city;
-    private List<Room> rooms;
 
-    public HotelDto() {}
-
-    public HotelDto(String id, String name, String city, List<Room> rooms) {
-        this.id = id;
+    public HotelDto(Long hotelId, String name, String address, String city) {
+        this.hotelId = hotelId;
         this.name = name;
+        this.address = address;
         this.city = city;
-        this.rooms = rooms;
     }
 
 }

@@ -19,9 +19,9 @@ public abstract class ReservationEntityMapper {
                 // Ignore invalid UUID
             }
         }
-        entity.setGuestId(reservation.guest() != null ? reservation.guest().id() : null);
-        entity.setRoomId(reservation.room() != null ? reservation.room().id() : null);
-        entity.setRateId(reservation.rate() != null ? reservation.rate().id() : null);
+        entity.setGuestId(reservation.guestId());
+        entity.setRoomId(reservation.roomId());
+        entity.setRateId(reservation.rateId());
         entity.setCheckInDate(reservation.checkInDate());
         entity.setCheckOutDate(reservation.checkOutDate());
         entity.setStatus(reservation.status());
@@ -29,16 +29,9 @@ public abstract class ReservationEntityMapper {
     }
 
     @Mapping(target = "id", expression = "java(reservationEntity.getId() != null ? reservationEntity.getId().toString() : null)")
-    @Mapping(target = "guest.id", source = "guestId")
-    @Mapping(target = "guest.firstName", constant = "")
-    @Mapping(target = "guest.lastName", constant = "")
-    @Mapping(target = "guest.email", constant = "")
-    @Mapping(target = "room.id", source = "roomId")
-    @Mapping(target = "room.roomNumber", constant = "")
-    @Mapping(target = "room.type", constant = "")
-    @Mapping(target = "rate.id", source = "rateId")
-    @Mapping(target = "rate.name", constant = "")
-    @Mapping(target = "rate.amount", ignore = true)
+    @Mapping(target = "guestId", source = "guestId")
+    @Mapping(target = "roomId", source = "roomId")
+    @Mapping(target = "rateId", source = "rateId")
     public abstract Reservation toDomain(ReservationEntity reservationEntity);
 
 }

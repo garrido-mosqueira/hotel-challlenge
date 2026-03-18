@@ -40,7 +40,7 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void getHotel() {
-        HotelEntity saved = hotelRepository.save(new HotelEntity("h1", "Hotel One", "New York"));
+        HotelEntity saved = hotelRepository.save(new HotelEntity("1", "Hotel One", "New York"));
 
         ResponseEntity<HotelDto> response = restClient.get()
                 .uri("/" + saved.getId())
@@ -68,7 +68,7 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void createHotel() {
-        HotelDto request = new HotelDto("h1", "Hotel One", "New York", List.of());
+        HotelDto request = new HotelDto(1L, "Hotel One", "Address 1", "New York");
 
         ResponseEntity<HotelDto> response = restClient.post()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -80,16 +80,16 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getName()).isEqualTo("Hotel One");
 
-        HotelEntity saved = hotelRepository.findById(response.getBody().getId()).orElseThrow();
+        HotelEntity saved = hotelRepository.findById(response.getBody().getHotelId().toString()).orElseThrow();
         assertThat(saved.getName()).isEqualTo("Hotel One");
         assertThat(saved.getCity()).isEqualTo("New York");
     }
 
     @Test
     void updateHotel() {
-        HotelEntity saved = hotelRepository.save(new HotelEntity("h1", "Hotel One", "New York"));
+        HotelEntity saved = hotelRepository.save(new HotelEntity("1", "Hotel One", "New York"));
 
-        HotelDto request = new HotelDto(saved.getId(), "Hotel Updated", "Miami", List.of());
+        HotelDto request = new HotelDto(Long.valueOf(saved.getId()), "Hotel Updated", "Address 1", "Miami");
 
         ResponseEntity<HotelDto> response = restClient.put()
                 .uri("/" + saved.getId())
@@ -110,7 +110,7 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void deleteHotel() {
-        HotelEntity saved = hotelRepository.save(new HotelEntity("h1", "Hotel One", "New York"));
+        HotelEntity saved = hotelRepository.save(new HotelEntity("1", "Hotel One", "New York"));
 
         ResponseEntity<Void> response = restClient.delete()
                 .uri("/" + saved.getId())
@@ -123,8 +123,8 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void listHotels() {
-        hotelRepository.save(new HotelEntity("h2", "Hotel 2", "Miami"));
-        hotelRepository.save(new HotelEntity("h3", "Hotel 3", "Miami"));
+        hotelRepository.save(new HotelEntity("2", "Hotel 2", "Miami"));
+        hotelRepository.save(new HotelEntity("3", "Hotel 3", "Miami"));
 
         ResponseEntity<List<HotelDto>> response = restClient.get()
                 .retrieve()
@@ -137,8 +137,8 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void searchHotels() {
-        hotelRepository.save(new HotelEntity("h4", "Beach Hotel", "Miami"));
-        hotelRepository.save(new HotelEntity("h5", "Mountain Resort", "Denver"));
+        hotelRepository.save(new HotelEntity("4", "Beach Hotel", "Miami"));
+        hotelRepository.save(new HotelEntity("5", "Mountain Resort", "Denver"));
 
         ResponseEntity<List<HotelDto>> response = restClient.get()
                 .uri("/search?city=Miami")
