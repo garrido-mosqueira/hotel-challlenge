@@ -37,8 +37,7 @@ public class RoomController {
 
     @PostMapping
     public ResponseEntity<RoomDto> addRoom(@PathVariable String hotelId, @RequestBody RoomDto request) {
-        Room room = mapper.toDomain(request);
-        var created = useCase.addRoom(hotelId, room);
+        var created = useCase.addRoom(hotelId, mapper.toDomain(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(created));
     }
 

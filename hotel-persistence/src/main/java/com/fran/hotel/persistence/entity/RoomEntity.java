@@ -11,7 +11,10 @@ import java.util.UUID;
 @Entity
 @Table(name = "rooms")
 public class RoomEntity {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "uuid")
     private UUID id;
     private String roomNumber;
     private String type;
