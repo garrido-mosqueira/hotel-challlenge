@@ -46,7 +46,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": \"h1\",\n  \"name\": \"Hotel Example\",\n  \"city\": \"New York\"\n}"
+              "raw": "{\n  \"hotelId\": 1,\n  \"name\": \"Hotel Example\",\n  \"address\": \"123 Example St\",\n  \"city\": \"New York\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/api/hotels", "host": ["{{baseUrl}}"], "path": ["api","hotels"] }
           },
@@ -56,7 +56,7 @@
               "originalRequest": {},
               "status": "Created",
               "code": 201,
-              "body": "{\n  \"id\": \"h1\",\n  \"name\": \"Hotel Example\",\n  \"city\": \"New York\"\n}"
+              "body": "{\n  \"hotelId\": 1,\n  \"name\": \"Hotel Example\",\n  \"address\": \"123 Example St\",\n  \"city\": \"New York\"\n}"
             }
           ]
         },
@@ -67,7 +67,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": \"h1\",\n  \"name\": \"Hotel Updated\",\n  \"city\": \"Miami\"\n}"
+              "raw": "{\n  \"hotelId\": 1,\n  \"name\": \"Hotel Updated\",\n  \"address\": \"456 Updated Ave\",\n  \"city\": \"Miami\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/api/hotels/:id", "host": ["{{baseUrl}}"], "path": ["api","hotels",":id"], "variable": [{"key": "id", "value": "h1"}] }
           },
@@ -110,17 +110,17 @@
           "request": {
             "method": "POST",
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
-            "body": { "mode": "raw", "raw": "{\n  \"roomNumber\": \"101\",\n  \"type\": \"STANDARD\"\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"roomId\": \"35832746-9214-4190-8e10-91a520973a9e\",\n  \"hotelId\": \"h1\",\n  \"roomTypeId\": \"rt1\",\n  \"floor\": 1,\n  \"number\": \"101\",\n  \"name\": \"Standard Room 101\",\n  \"isAvailable\": true\n}" },
             "url": { "raw": "{{baseUrl}}/api/hotels/:hotelId/rooms", "host": ["{{baseUrl}}"], "path": ["api","hotels",":hotelId","rooms"], "variable": [{"key": "hotelId", "value": "h1"}] }
           },
-          "response": [ { "name": "201 Created", "status": "Created", "code": 201, "body": "{ \"id\": \"35832746-9214-4190-8e10-91a520973a9e\", \"roomNumber\": \"101\", \"type\": \"STANDARD\" }" } ]
+          "response": [ { "name": "201 Created", "status": "Created", "code": 201, "body": "{ \"roomId\": \"35832746-9214-4190-8e10-91a520973a9e\", \"hotelId\": \"h1\", \"roomTypeId\": \"rt1\", \"floor\": 1, \"number\": \"101\", \"name\": \"Standard Room 101\", \"isAvailable\": true }" } ]
         },
         {
           "name": "Update Room",
           "request": {
             "method": "PUT",
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
-            "body": { "mode": "raw", "raw": "{\n  \"id\": \"35832746-9214-4190-8e10-91a520973a9e\",\n  \"roomNumber\": \"102\",\n  \"type\": \"DELUXE\"\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"roomId\": \"35832746-9214-4190-8e10-91a520973a9e\",\n  \"hotelId\": \"h1\",\n  \"roomTypeId\": \"rt2\",\n  \"floor\": 1,\n  \"number\": \"102\",\n  \"name\": \"Deluxe Room 102\",\n  \"isAvailable\": true\n}" },
             "url": { "raw": "{{baseUrl}}/api/hotels/:hotelId/rooms/:id", "host": ["{{baseUrl}}"], "path": ["api","hotels",":hotelId","rooms",":id"], "variable": [{"key": "hotelId", "value": "h1"}, {"key": "id", "value": "35832746-9214-4190-8e10-91a520973a9e"}] }
           },
           "response": []
@@ -164,11 +164,11 @@
             "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "X-User-Id", "value": "user-1" } ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"guestId\": \"guest-1\",\n  \"roomId\": \"35832746-9214-4190-8e10-91a520973a9e\",\n  \"checkInDate\": \"2026-03-20\",\n  \"checkOutDate\": \"2026-03-22\",\n  \"status\": \"PENDING\"\n}"
+              "raw": "{\n  \"id\": \"670878e3-a30a-4720-8025-a134a4752c1e\",\n  \"guestId\": \"guest-1\",\n  \"roomId\": \"35832746-9214-4190-8e10-91a520973a9e\",\n  \"rateId\": \"rate-1\",\n  \"checkInDate\": \"2026-03-20\",\n  \"checkOutDate\": \"2026-03-22\",\n  \"status\": \"PENDING\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/api/reservations", "host": ["{{baseUrl}}"], "path": ["api","reservations"] }
           },
-          "response": [ { "name": "201 Created", "status": "Created", "code": 201, "body": "{ \"id\": \"670878e3-a30a-4720-8025-a134a4752c1e\", \"status\": \"PENDING\" }" } ]
+          "response": [ { "name": "201 Created", "status": "Created", "code": 201, "body": "{ \"id\": \"670878e3-a30a-4720-8025-a134a4752c1e\", \"guestId\": \"guest-1\", \"roomId\": \"35832746-9214-4190-8e10-91a520973a9e\", \"rateId\": \"rate-1\", \"status\": \"PENDING\" }" } ]
         },
         {
           "name": "Cancel Reservation",
