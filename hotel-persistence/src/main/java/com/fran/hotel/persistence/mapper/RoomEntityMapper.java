@@ -12,30 +12,46 @@ import java.util.UUID;
 public interface RoomEntityMapper {
 
     @Mapping(target = "hotel", ignore = true)
-    @Mapping(target = "id", source = "roomId", qualifiedByName = "longToUuid")
+    @Mapping(target = "id", source = "roomId", qualifiedByName = "stringToUuid")
     @Mapping(target = "type", source = "roomTypeId")
     @Mapping(target = "roomNumber", source = "number")
     RoomEntity toEntity(Room room);
 
-    @Mapping(target = "roomId", source = "id", qualifiedByName = "uuidToLong")
+    @Mapping(target = "roomId", source = "id", qualifiedByName = "uuidToString")
     @Mapping(target = "roomTypeId", source = "type")
     @Mapping(target = "number", source = "roomNumber")
     // Map missing fields if needed, ignoring for now as they might not be in entity
-    @Mapping(target = "hotelId", ignore = true)
+    @Mapping(target = "hotelId", source = "hotel.id")
     @Mapping(target = "floor", ignore = true)
     @Mapping(target = "name", ignore = true)
     @Mapping(target = "isAvailable", ignore = true)
     Room toDomain(RoomEntity roomEntity);
 
-    @Named("longToUuid")
-    default UUID longToUuid(Long id) {
+    @Named("stringToUuid")
+    default UUID stringToUuid(String id) {
         if (id == null) return null;
-        return new UUID(0L, id);
+        try {
+            // Check if it's already a valid UUID
+            return UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            // Generate a deterministic UUID from the String or treat it as a long value
+            try {
+                return new UUID(0L, Long.parseLong(id));
+            } catch (NumberFormatException nfe) {
+                return UUID.nameUUIDFromBytes(id.getBytes());
+            }
+        }
     }
 
-    @Named("uuidToLong")
-    default Long uuidToLong(UUID id) {
-        return id != null ? id.getLeastSignificantBits() : null;
+    @Named("uuidToString")
+    default String uuidToString(UUID id) {
+        if (id == null) return null;
+        // Check if the most significant bits are 0. 
+        // If so, it was likely generated from a Long as in our stringToUuid fallback.
+        if (id.getMostSignificantBits() == 0L) {
+            return String.valueOf(id.getLeastSignificantBits());
+        }
+        return id.toString();
     }
 
 }

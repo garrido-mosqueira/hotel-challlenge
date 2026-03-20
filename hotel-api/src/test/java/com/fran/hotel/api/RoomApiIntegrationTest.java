@@ -16,6 +16,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -117,13 +118,16 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody().getRoomId()).isNotNull(); // Expecting an auto-generated ID
         assertThat(response.getBody().getNumber()).isEqualTo("101");
 
-        // The ID in DTO is String.valueOf(long) where long is uuid.getLeastSignificantBits()
-        long bits = Long.parseLong(response.getBody().getRoomId());
-        
-        RoomEntity saved = roomRepository.findAll().stream()
-                .filter(r -> r.getId().getLeastSignificantBits() == bits)
-                .findFirst()
-                .orElse(null);
+        // Assuming it's generated as a proper UUID String now (from default domain model generation)
+        String generatedId = response.getBody().getRoomId();
+        UUID uuid;
+        try {
+           uuid = UUID.fromString(generatedId);
+        } catch (IllegalArgumentException e) {
+           uuid = new UUID(0L, Long.parseLong(generatedId));
+        }
+
+        RoomEntity saved = roomRepository.findById(uuid).orElse(null);
         
         assertThat(saved).isNotNull();
         assertThat(saved.getRoomNumber()).isEqualTo("101");
@@ -134,7 +138,8 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("1", "Hotel 10", "Madrid");
         hotelRepository.save(h);
 
-        String customId = "123456";
+        // Instead of pure long string like "123456", use a proper UUID format to avoid parse errors when fetching via ID mapping back to string or long logic
+        String customId = UUID.randomUUID().toString();
         RoomDto request = new RoomDto(customId, h.getId(), "STANDARD_TYPE", 1, "101", "Standard Room", true);
 
         ResponseEntity<RoomDto> response = restClient.post()
@@ -148,9 +153,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getNumber()).isEqualTo("101");
 
-        // The ID in the response should match what we sent, or at least be derivable.
-        // RoomPersistenceAdapter uses new UUID(0L, room.roomId()) if roomId is provided.
-        RoomEntity saved = roomRepository.findById(new java.util.UUID(0L, 123456L)).orElse(null);
+        RoomEntity saved = roomRepository.findById(UUID.fromString(customId)).orElse(null);
         assertThat(saved).as("Room should be saved in repository").isNotNull();
         assertThat(saved.getRoomNumber()).isEqualTo("101");
     }
@@ -160,12 +163,11 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("1", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
         
-        // Use a known ID to avoid random UUID issues during the test
-        java.util.UUID roomIdUuid = new java.util.UUID(0L, 101L);
+        UUID roomIdUuid = UUID.randomUUID();
         RoomEntity room = new RoomEntity(roomIdUuid, "101", "STANDARD", h);
         room = roomRepository.save(room);
 
-        String roomIdStr = "101";
+        String roomIdStr = roomIdUuid.toString();
         RoomDto request = new RoomDto(roomIdStr, h.getId(), "DELUXE_TYPE", 1, "102", "Deluxe Room", true);
 
         ResponseEntity<RoomDto> response = restClient.put()

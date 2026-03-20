@@ -8,12 +8,12 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = RoomEntityMapper.class)
 public interface HotelEntityMapper {
 
-    @Mapping(target = "id", expression = "java(hotel.hotelId() != null ? String.valueOf(hotel.hotelId()) : null)")
+    @Mapping(target = "id", source = "hotelId")
     @Mapping(target = "city", source = "city") 
     @Mapping(target = "rooms", ignore = true) 
     HotelEntity toEntity(Hotel hotel);
 
-    @Mapping(target = "hotelId", expression = "java(hotelEntity.getId() != null ? Long.valueOf(hotelEntity.getId()) : null)")
+    @Mapping(target = "hotelId", source = "id")
     @Mapping(target = "city", source = "city") 
     @Mapping(target = "address", constant = "")
     Hotel toDomain(HotelEntity hotelEntity);

@@ -13,7 +13,6 @@ import java.util.UUID;
 public class RoomEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "uuid")
     private UUID id;
     private String roomNumber;

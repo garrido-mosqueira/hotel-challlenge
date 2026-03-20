@@ -42,7 +42,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
     private final Guest defaultGuest = new Guest(1L, "John", "Doe", "john.doe@example.com");
     private final String roomIdStr = UUID.randomUUID().toString();
-    private final Room defaultRoom = new Room(null, 1L, "STANDARD_TYPE", 1, "101", "Standard Room", true);
+    private final Room defaultRoom = new Room(null, "1", "STANDARD_TYPE", 1, "101", "Standard Room", true);
 
     private String baseUrl() { return "http://localhost:" + port + "/api/reservations"; }
 

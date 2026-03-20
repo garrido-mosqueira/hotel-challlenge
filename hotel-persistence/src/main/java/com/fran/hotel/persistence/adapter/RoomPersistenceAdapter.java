@@ -45,6 +45,9 @@ public class RoomPersistenceAdapter implements RoomPersistencePort {
                     return hotelRepository.save(newHotel);
                 });
         RoomEntity roomEntity = roomMapper.toEntity(room);
+        if (roomEntity.getId() == null) {
+            roomEntity.setId(UUID.randomUUID());
+        }
         roomEntity.setHotel(hotel);
         RoomEntity saved = roomRepository.save(roomEntity);
         return roomMapper.toDomain(saved);
