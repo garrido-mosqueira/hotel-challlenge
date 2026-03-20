@@ -14,6 +14,7 @@ import java.util.List;
 public class HotelEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String name;
     private String city;

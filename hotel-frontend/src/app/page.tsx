@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 type Hotel = {
-  id: string;
+  hotelId: string;
   name: string;
   city: string;
 };
@@ -42,15 +42,17 @@ export default function Home() {
       if (response.ok) {
         setNewHotel({ name: '', city: '' });
         fetchHotels();
+      } else {
+        console.error('Failed to add hotel:', await response.text());
       }
     } catch (error) {
       console.error('Failed to add hotel:', error);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (hotelId: string) => {
     try {
-      const response = await fetch(`/api/hotels/${id}`, {
+      const response = await fetch(`/api/hotels/${hotelId}`, {
         method: 'DELETE',
       });
       if (response.ok) {
@@ -96,7 +98,7 @@ export default function Home() {
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {hotels.map((hotel) => (
               <li 
-                key={hotel.id} 
+                key={hotel.hotelId}
                 style={{ 
                   border: '1px solid #ccc', 
                   margin: '0.5rem 0', 
@@ -110,7 +112,7 @@ export default function Home() {
                   <strong>{hotel.name}</strong> - {hotel.city}
                 </div>
                 <button 
-                  onClick={() => handleDelete(hotel.id)}
+                  onClick={() => handleDelete(hotel.hotelId)}
                   style={{ backgroundColor: 'red', color: 'white', border: 'none', padding: '0.5rem', cursor: 'pointer' }}
                 >
                   Delete

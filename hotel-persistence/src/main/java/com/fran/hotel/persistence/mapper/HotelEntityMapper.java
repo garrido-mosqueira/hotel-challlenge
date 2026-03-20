@@ -15,7 +15,6 @@ public interface HotelEntityMapper {
 
     @Mapping(target = "hotelId", source = "id")
     @Mapping(target = "city", source = "city") 
-    @Mapping(target = "address", constant = "")
     Hotel toDomain(HotelEntity hotelEntity);
 
 }

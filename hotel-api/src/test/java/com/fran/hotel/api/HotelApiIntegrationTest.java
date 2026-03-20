@@ -68,7 +68,7 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void createHotel() {
-        HotelDto request = new HotelDto("1", "Hotel One", "Address 1", "New York");
+        HotelDto request = new HotelDto("1", "Hotel One", "New York");
 
         ResponseEntity<HotelDto> response = restClient.post()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -86,10 +86,25 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
     }
 
     @Test
+    void createHotelWithoutId() {
+        HotelDto request = new HotelDto(null, "Hotel Two", "Madrid");
+
+        ResponseEntity<HotelDto> response = restClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toEntity(HotelDto.class);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(201);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getHotelId()).isNotNull();
+    }
+
+    @Test
     void updateHotel() {
         HotelEntity saved = hotelRepository.save(new HotelEntity("1", "Hotel One", "New York"));
 
-        HotelDto request = new HotelDto(saved.getId(), "Hotel Updated", "Address 1", "Miami");
+        HotelDto request = new HotelDto(saved.getId(), "Hotel Updated", "Miami");
 
         ResponseEntity<HotelDto> response = restClient.put()
                 .uri("/" + saved.getId())

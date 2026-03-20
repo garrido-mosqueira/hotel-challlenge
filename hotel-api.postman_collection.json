@@ -46,7 +46,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"hotelId\": 1,\n  \"name\": \"Hotel Example\",\n  \"address\": \"123 Example St\",\n  \"city\": \"New York\"\n}"
+              "raw": "{\n  \"hotelId\": 1,\n  \"name\": \"Hotel Example\",\n  \"city\": \"New York\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/api/hotels", "host": ["{{baseUrl}}"], "path": ["api","hotels"] }
           },
@@ -56,7 +56,7 @@
               "originalRequest": {},
               "status": "Created",
               "code": 201,
-              "body": "{\n  \"hotelId\": 1,\n  \"name\": \"Hotel Example\",\n  \"address\": \"123 Example St\",\n  \"city\": \"New York\"\n}"
+              "body": "{\n  \"hotelId\": 1,\n  \"name\": \"Hotel Example\",\n  \"city\": \"New York\"\n}"
             }
           ]
         },
@@ -67,7 +67,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"hotelId\": 1,\n  \"name\": \"Hotel Updated\",\n  \"address\": \"456 Updated Ave\",\n  \"city\": \"Miami\"\n}"
+              "raw": "{\n  \"hotelId\": 1,\n  \"name\": \"Hotel Updated\",\n  \"city\": \"Miami\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/api/hotels/:id", "host": ["{{baseUrl}}"], "path": ["api","hotels",":id"], "variable": [{"key": "id", "value": "h1"}] }
           },
