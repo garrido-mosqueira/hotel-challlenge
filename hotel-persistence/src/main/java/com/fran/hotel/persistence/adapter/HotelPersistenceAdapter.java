@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 @Repository
 @RequiredArgsConstructor
 @CacheConfig(cacheNames = "hotelCache")
@@ -35,7 +37,7 @@ public class HotelPersistenceAdapter implements HotelPersistencePort {
     public List<Hotel> findAll() {
         return hotelRepository.findAll().stream()
                 .map(hotelMapper::toDomain)
-                .toList();
+                .collect(toList());
     }
 
     @Override
@@ -62,7 +64,7 @@ public class HotelPersistenceAdapter implements HotelPersistencePort {
     public List<Hotel> findByCity(String city) {
         return hotelRepository.findByCityContainingIgnoreCase(city).stream()
                 .map(hotelMapper::toDomain)
-                .toList();
+                .collect(toList());
     }
 
 }
