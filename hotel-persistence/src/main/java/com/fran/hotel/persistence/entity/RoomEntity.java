@@ -17,6 +17,9 @@ public class RoomEntity {
     private UUID id;
     private String roomNumber;
     private String type;
+    private int floor;
+    private String name;
+    private boolean isAvailable;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id")
@@ -24,11 +27,18 @@ public class RoomEntity {
 
     public RoomEntity() {}
 
-    public RoomEntity(UUID id, String roomNumber, String type, HotelEntity hotel) {
+    public RoomEntity(UUID id, String roomNumber, String type, int floor, String name, boolean isAvailable, HotelEntity hotel) {
         this.id = id;
         this.roomNumber = roomNumber;
         this.type = type;
+        this.floor = floor;
+        this.name = name;
+        this.isAvailable = isAvailable;
         this.hotel = hotel;
+    }
+
+    public RoomEntity(UUID id, String roomNumber, String type, HotelEntity hotel) {
+        this(id, roomNumber, type, 0, null, true, hotel);
     }
 
 }

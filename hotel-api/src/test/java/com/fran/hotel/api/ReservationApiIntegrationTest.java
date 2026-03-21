@@ -55,8 +55,8 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void getReservationsForUser() {
-        ReservationEntity res1 = new ReservationEntity(null, String.valueOf(defaultGuest.guestId()), roomIdStr, null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
-        ReservationEntity res2 = new ReservationEntity(null, "user-2", UUID.randomUUID().toString(), null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
+        ReservationEntity res1 = new ReservationEntity(null, String.valueOf(defaultGuest.guestId()), roomIdStr, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
+        ReservationEntity res2 = new ReservationEntity(null, "user-2", UUID.randomUUID().toString(), LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
         reservationRepository.saveAll(List.of(res1, res2));
         reservationRepository.flush();
 
@@ -84,7 +84,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void getReservation() {
-        ReservationEntity res1 = new ReservationEntity(null, String.valueOf(defaultGuest.guestId()), roomIdStr, null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
+        ReservationEntity res1 = new ReservationEntity(null, String.valueOf(defaultGuest.guestId()), roomIdStr, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
         reservationRepository.save(res1);
         reservationRepository.flush();
 
@@ -114,7 +114,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void createReservation() {
-        ReservationDto request = new ReservationDto("provided-id", String.valueOf(defaultGuest.guestId()), roomIdStr, null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
+        ReservationDto request = new ReservationDto("provided-id", String.valueOf(defaultGuest.guestId()), roomIdStr, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
 
         ResponseEntity<ReservationDto> response = restClient.post()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -136,7 +136,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
     @Test
     void cancelReservation() {
-        ReservationEntity res1 = new ReservationEntity(null, String.valueOf(defaultGuest.guestId()), roomIdStr, null, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
+        ReservationEntity res1 = new ReservationEntity(null, String.valueOf(defaultGuest.guestId()), roomIdStr, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
         reservationRepository.save(res1);
         reservationRepository.flush();
 

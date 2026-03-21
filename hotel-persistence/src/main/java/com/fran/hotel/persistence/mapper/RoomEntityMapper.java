@@ -12,19 +12,15 @@ import java.util.UUID;
 public interface RoomEntityMapper {
 
     @Mapping(target = "hotel", ignore = true)
-    @Mapping(target = "id", source = "roomId", qualifiedByName = "stringToUuid")
+    @Mapping(target = "id", source = "id", qualifiedByName = "stringToUuid")
     @Mapping(target = "type", source = "roomTypeId")
     @Mapping(target = "roomNumber", source = "number")
     RoomEntity toEntity(Room room);
 
-    @Mapping(target = "roomId", source = "id", qualifiedByName = "uuidToString")
+    @Mapping(target = "id", source = "id", qualifiedByName = "uuidToString")
     @Mapping(target = "roomTypeId", source = "type")
     @Mapping(target = "number", source = "roomNumber")
-    // Map missing fields if needed, ignoring for now as they might not be in entity
     @Mapping(target = "hotelId", source = "hotel.id")
-    @Mapping(target = "floor", ignore = true)
-    @Mapping(target = "name", ignore = true)
-    @Mapping(target = "isAvailable", ignore = true)
     Room toDomain(RoomEntity roomEntity);
 
     @Named("stringToUuid")

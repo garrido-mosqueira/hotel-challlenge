@@ -1,7 +1,7 @@
 package com.fran.hotel.domain.model;
 
 public record Room(
-    String roomId,
+    String id,
     String hotelId,
     String roomTypeId,
     int floor,

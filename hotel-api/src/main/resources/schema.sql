@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS reservations (
     id varchar(255) PRIMARY KEY,
     guestId varchar(255),
     roomId varchar(255),
-    rateId varchar(255),
     checkInDate date,
     checkOutDate date,
     status varchar(255)

@@ -164,11 +164,11 @@
             "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "X-User-Id", "value": "user-1" } ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": \"670878e3-a30a-4720-8025-a134a4752c1e\",\n  \"guestId\": \"guest-1\",\n  \"roomId\": \"35832746-9214-4190-8e10-91a520973a9e\",\n  \"rateId\": \"rate-1\",\n  \"checkInDate\": \"2026-03-20\",\n  \"checkOutDate\": \"2026-03-22\",\n  \"status\": \"PENDING\"\n}"
+              "raw": "{\n  \"id\": \"670878e3-a30a-4720-8025-a134a4752c1e\",\n  \"guestId\": \"guest-1\",\n  \"roomId\": \"35832746-9214-4190-8e10-91a520973a9e\",\n  \"checkInDate\": \"2026-03-20\",\n  \"checkOutDate\": \"2026-03-22\",\n  \"status\": \"PENDING\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/api/reservations", "host": ["{{baseUrl}}"], "path": ["api","reservations"] }
           },
-          "response": [ { "name": "201 Created", "status": "Created", "code": 201, "body": "{ \"id\": \"670878e3-a30a-4720-8025-a134a4752c1e\", \"guestId\": \"guest-1\", \"roomId\": \"35832746-9214-4190-8e10-91a520973a9e\", \"rateId\": \"rate-1\", \"status\": \"PENDING\" }" } ]
+          "response": [ { "name": "201 Created", "status": "Created", "code": 201, "body": "{ \"id\": \"670878e3-a30a-4720-8025-a134a4752c1e\", \"guestId\": \"guest-1\", \"roomId\": \"35832746-9214-4190-8e10-91a520973a9e\", \"status\": \"PENDING\" }" } ]
         },
         {
           "name": "Cancel Reservation",

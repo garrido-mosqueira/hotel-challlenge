@@ -3,8 +3,8 @@ package com.fran.hotel.domain.model;
 import java.time.LocalDate;
 
 public record RoomTypeInventory(
-    Long hotelId,
-    String roomTypeId,
+    String id,
+    String hotelId,
     LocalDate date,
     int totalInventory,
     int totalReserved
