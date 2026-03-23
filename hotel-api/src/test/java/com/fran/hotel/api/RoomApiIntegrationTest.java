@@ -191,6 +191,42 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
     }
 
     @Test
+    void updateRoomWithMismatchedIdInBody() {
+        HotelEntity h = new HotelEntity("1", "Hotel 10", "Madrid");
+        h = hotelRepository.save(h);
+
+        UUID roomIdUuid = UUID.randomUUID();
+        RoomEntity room = new RoomEntity(roomIdUuid, "101", "STANDARD", h);
+        room = roomRepository.save(room);
+
+        String roomIdStr = roomIdUuid.toString();
+        // Body has a DIFFERENT ID and DIFFERENT hotel ID
+        String differentIdStr = UUID.randomUUID().toString();
+        RoomDto request = new RoomDto(differentIdStr, "DIFFERENT_HOTEL", "DELUXE_TYPE", 1, "102", "Deluxe Room", true);
+
+        ResponseEntity<RoomDto> response = restClient.put()
+                .uri(baseUrl(h.getId()) + "/" + roomIdStr)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toEntity(RoomDto.class);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(response.getBody()).isNotNull();
+        // We expect the room in the path (roomIdStr) to be updated
+        assertThat(response.getBody().getId()).isEqualTo(roomIdStr);
+        assertThat(response.getBody().getHotelId()).isEqualTo(h.getId());
+        assertThat(response.getBody().getNumber()).isEqualTo("102");
+
+        RoomEntity updated = roomRepository.findById(roomIdUuid).orElseThrow();
+        assertThat(updated.getNumber()).isEqualTo("102");
+        assertThat(updated.getHotel().getId()).isEqualTo(h.getId());
+        
+        // Ensure no new room was created with differentIdStr
+        assertThat(roomRepository.findById(UUID.fromString(differentIdStr))).isEmpty();
+    }
+
+    @Test
     void deleteRoom() {
         HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);

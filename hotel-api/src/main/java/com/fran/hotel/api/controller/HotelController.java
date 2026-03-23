@@ -42,7 +42,13 @@ public class HotelController {
 
     @PutMapping("/{id}")
     public ResponseEntity<HotelDto> updateHotel(@PathVariable String id, @RequestBody HotelDto hotelDto) {
-        var updated = useCase.updateHotel(mapper.toDomain(hotelDto));
+        var hotelToUpdate = mapper.toDomain(hotelDto);
+        var hotel = new com.fran.hotel.domain.model.Hotel(
+                id,
+                hotelToUpdate.name(),
+                hotelToUpdate.city()
+        );
+        var updated = useCase.updateHotel(hotel);
         return ResponseEntity.ok(mapper.toDto(updated));
     }
 

@@ -43,7 +43,16 @@ public class RoomController {
 
     @PutMapping("/{roomId}")
     public ResponseEntity<RoomDto> updateRoom(@PathVariable String hotelId, @PathVariable String roomId, @RequestBody RoomDto request) {
-        Room room = mapper.toDomain(request);
+        Room roomToUpdate = mapper.toDomain(request);
+        Room room = new Room(
+                roomId,
+                hotelId,
+                roomToUpdate.typeId(),
+                roomToUpdate.floor(),
+                roomToUpdate.number(),
+                roomToUpdate.name(),
+                roomToUpdate.isAvailable()
+        );
         var updated = useCase.updateRoom(hotelId, room);
         return ResponseEntity.ok(mapper.toDto(updated));
     }

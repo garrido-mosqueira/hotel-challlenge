@@ -4,13 +4,11 @@ import com.fran.hotel.domain.model.Reservation;
 import com.fran.hotel.domain.model.ReservationStatus;
 import com.fran.hotel.domain.model.Room;
 import com.fran.hotel.domain.model.RoomTypeInventory;
-import com.fran.hotel.domain.port.ReservationPaymentPort;
-import com.fran.hotel.domain.port.ReservationPersistencePort;
-import com.fran.hotel.domain.port.ReservationUseCase;
-import com.fran.hotel.domain.port.RoomPersistencePort;
-import com.fran.hotel.domain.port.RoomTypeInventoryPersistencePort;
+import com.fran.hotel.domain.port.*;
 
 import java.util.List;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class ReservationService implements ReservationUseCase {
 
@@ -50,7 +48,7 @@ public class ReservationService implements ReservationUseCase {
                 reservation.checkOutDate().minusDays(1)
         );
 
-        long nights = java.time.temporal.ChronoUnit.DAYS.between(reservation.checkInDate(), reservation.checkOutDate());
+        long nights = DAYS.between(reservation.checkInDate(), reservation.checkOutDate());
         if (inventories.size() < nights) {
             throw new RuntimeException("Missing inventory records for the selected dates");
         }
@@ -74,4 +72,5 @@ public class ReservationService implements ReservationUseCase {
             persistence.save(canceled);
         }
     }
+
 }
