@@ -3,6 +3,7 @@ package com.fran.hotel.api;
 import com.fran.hotel.api.dto.HotelDto;
 import com.fran.hotel.persistence.entity.HotelEntity;
 import com.fran.hotel.persistence.repository.HotelRepository;
+import com.fran.hotel.persistence.repository.RoomTypeInventoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
     @Autowired
     private HotelRepository hotelRepository;
 
+    @Autowired
+    private RoomTypeInventoryRepository roomTypeInventoryRepository;
+
     private RestClient restClient;
 
     @LocalServerPort
@@ -34,6 +38,7 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
 
     @BeforeEach
     void setup() {
+        roomTypeInventoryRepository.deleteAll();
         hotelRepository.deleteAll();
         restClient = RestClient.builder().baseUrl(baseUrl()).build();
     }

@@ -5,6 +5,7 @@ import com.fran.hotel.persistence.entity.HotelEntity;
 import com.fran.hotel.persistence.entity.RoomEntity;
 import com.fran.hotel.persistence.repository.HotelRepository;
 import com.fran.hotel.persistence.repository.RoomRepository;
+import com.fran.hotel.persistence.repository.RoomTypeInventoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
     @Autowired
     private RoomRepository roomRepository;
 
+    @Autowired
+    private RoomTypeInventoryRepository roomTypeInventoryRepository;
+
     private RestClient restClient;
 
     @LocalServerPort
@@ -39,6 +43,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
 
     @BeforeEach
     void setup() {
+        roomTypeInventoryRepository.deleteAll();
         roomRepository.deleteAll();
         hotelRepository.deleteAll();
         restClient = RestClient.builder().build();

@@ -2,9 +2,13 @@ package com.fran.hotel.application.service;
 
 import com.fran.hotel.domain.model.Reservation;
 import com.fran.hotel.domain.model.ReservationStatus;
+import com.fran.hotel.domain.model.Room;
+import com.fran.hotel.domain.model.RoomTypeInventory;
 import com.fran.hotel.domain.port.ReservationPaymentPort;
 import com.fran.hotel.domain.port.ReservationPersistencePort;
 import com.fran.hotel.domain.port.ReservationUseCase;
+import com.fran.hotel.domain.port.RoomPersistencePort;
+import com.fran.hotel.domain.port.RoomTypeInventoryPersistencePort;
 
 import java.util.List;
 
@@ -12,10 +16,14 @@ public class ReservationService implements ReservationUseCase {
 
     private final ReservationPersistencePort persistence;
     private final ReservationPaymentPort paymentPort;
+    private final RoomPersistencePort roomPersistencePort;
+    private final RoomTypeInventoryPersistencePort roomTypeInventoryPersistencePort;
 
-    public ReservationService(ReservationPersistencePort persistence, ReservationPaymentPort paymentPort) {
+    public ReservationService(ReservationPersistencePort persistence, ReservationPaymentPort paymentPort, RoomPersistencePort roomPersistencePort, RoomTypeInventoryPersistencePort roomTypeInventoryPersistencePort) {
         this.persistence = persistence;
         this.paymentPort = paymentPort;
+        this.roomPersistencePort = roomPersistencePort;
+        this.roomTypeInventoryPersistencePort = roomTypeInventoryPersistencePort;
     }
 
     @Override
@@ -30,6 +38,29 @@ public class ReservationService implements ReservationUseCase {
 
     @Override
     public Reservation createReservation(Reservation reservation) {
+        Room room = roomPersistencePort.findById(reservation.roomId());
+        if (room == null) {
+            throw new RuntimeException("Room not found");
+        }
+
+        List<RoomTypeInventory> inventories = roomTypeInventoryPersistencePort.findByHotelIdAndRoomTypeIdAndDateBetween(
+                room.hotelId(),
+                room.typeId(),
+                reservation.checkInDate(),
+                reservation.checkOutDate().minusDays(1)
+        );
+
+        long nights = java.time.temporal.ChronoUnit.DAYS.between(reservation.checkInDate(), reservation.checkOutDate());
+        if (inventories.size() < nights) {
+            throw new RuntimeException("Missing inventory records for the selected dates");
+        }
+
+        boolean hasAvailability = inventories.stream().allMatch(RoomTypeInventory::hasAvailability);
+
+        if (!hasAvailability) {
+            throw new RuntimeException("No availability for the selected dates");
+        }
+
         Reservation savedReservation = persistence.save(reservation);
         return paymentPort.executeReservationPayment(savedReservation);
     }

@@ -1,0 +1,96 @@
+package com.fran.hotel.application.service;
+
+import com.fran.hotel.domain.model.Reservation;
+import com.fran.hotel.domain.model.ReservationStatus;
+import com.fran.hotel.domain.model.Room;
+import com.fran.hotel.domain.model.RoomTypeInventory;
+import com.fran.hotel.domain.port.ReservationPaymentPort;
+import com.fran.hotel.domain.port.ReservationPersistencePort;
+import com.fran.hotel.domain.port.RoomPersistencePort;
+import com.fran.hotel.domain.port.RoomTypeInventoryPersistencePort;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+class ReservationServiceTest {
+
+    @Mock
+    private ReservationPersistencePort persistence;
+    @Mock
+    private ReservationPaymentPort paymentPort;
+    @Mock
+    private RoomPersistencePort roomPersistencePort;
+    @Mock
+    private RoomTypeInventoryPersistencePort roomTypeInventoryPersistencePort;
+
+    @InjectMocks
+    private ReservationService reservationService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void createReservationShouldFailWhenNoAvailability() {
+        // Given
+        String roomId = "room-1";
+        LocalDate checkIn = LocalDate.now();
+        LocalDate checkOut = checkIn.plusDays(2);
+        Reservation reservation = new Reservation(null, "guest-1", roomId, checkIn, checkOut, ReservationStatus.PENDING);
+
+        Room room = new Room(roomId, "hotel-1", "type-1", 1, "101", "Room 101", true);
+        when(roomPersistencePort.findById(roomId)).thenReturn(room);
+
+        RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", "type-1", checkIn, 1, 1);
+        RoomTypeInventory inventory2 = new RoomTypeInventory("inv-2", "hotel-1", "type-1", checkIn.plusDays(1), 1, 0);
+        when(roomTypeInventoryPersistencePort.findByHotelIdAndRoomTypeIdAndDateBetween(
+                eq("hotel-1"), eq("type-1"), eq(checkIn), eq(checkOut.minusDays(1))))
+                .thenReturn(List.of(inventory1, inventory2));
+
+        // When & Then
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> reservationService.createReservation(reservation));
+        assertEquals("No availability for the selected dates", exception.getMessage());
+        verify(persistence, never()).save(any());
+    }
+
+    @Test
+    void createReservationShouldSucceedWhenAvailabilityExists() {
+        // Given
+        String roomId = "room-1";
+        LocalDate checkIn = LocalDate.now();
+        LocalDate checkOut = checkIn.plusDays(2);
+        Reservation reservation = new Reservation(null, "guest-1", roomId, checkIn, checkOut, ReservationStatus.PENDING);
+
+        Room room = new Room(roomId, "hotel-1", "type-1", 1, "101", "Room 101", true);
+        when(roomPersistencePort.findById(roomId)).thenReturn(room);
+
+        RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", "type-1", checkIn, 1, 0);
+        RoomTypeInventory inventory2 = new RoomTypeInventory("inv-2", "hotel-1", "type-1", checkIn.plusDays(1), 1, 0);
+        when(roomTypeInventoryPersistencePort.findByHotelIdAndRoomTypeIdAndDateBetween(
+                eq("hotel-1"), eq("type-1"), eq(checkIn), eq(checkOut.minusDays(1))))
+                .thenReturn(List.of(inventory1, inventory2));
+
+        Reservation savedReservation = reservation.withStatus(ReservationStatus.CONFIRMED);
+        when(persistence.save(reservation)).thenReturn(savedReservation);
+        when(paymentPort.executeReservationPayment(savedReservation)).thenReturn(savedReservation);
+
+        // When
+        Reservation result = reservationService.createReservation(reservation);
+
+        // Then
+        assertNotNull(result);
+        verify(persistence).save(reservation);
+        verify(paymentPort).executeReservationPayment(savedReservation);
+    }
+}

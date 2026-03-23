@@ -30,6 +30,13 @@ public class RoomPersistenceAdapter implements RoomPersistencePort {
     }
 
     @Override
+    public Room findById(String roomId) {
+        return roomRepository.findById(UUID.fromString(roomId))
+                .map(roomMapper::toDomain)
+                .orElse(null);
+    }
+
+    @Override
     public List<Room> findByHotelId(String hotelId) {
         return roomRepository.findByHotelId(hotelId).stream()
                 .map(roomMapper::toDomain)
