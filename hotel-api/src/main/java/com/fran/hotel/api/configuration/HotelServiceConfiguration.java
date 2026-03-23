@@ -16,8 +16,9 @@ public class HotelServiceConfiguration {
     }
 
     @Bean
-    public RoomUseCase roomUseCase(RoomPersistencePort persistence) {
-        return new RoomService(persistence);
+    public RoomUseCase roomUseCase(RoomPersistencePort persistence,
+                                   RoomTypeInventoryPersistencePort roomTypeInventoryPersistencePort) {
+        return new RoomService(persistence, roomTypeInventoryPersistencePort);
     }
 
     @Bean
