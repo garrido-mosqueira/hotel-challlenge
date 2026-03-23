@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface RoomRepository extends JpaRepository<RoomEntity, UUID> {
 
     @Query("SELECT r FROM RoomEntity r WHERE r.id = :roomId AND r.hotel.id = :hotelId")
-    RoomEntity findByHotelIdAndRoomId(@Param("hotelId") String hotelId, @Param("roomId") UUID roomId);
+    RoomEntity findByHotelIdAndRoomId(@Param("hotelId") String hotelId, @Param("roomId") UUID id);
 
     List<RoomEntity> findByHotelId(String hotelId);
 

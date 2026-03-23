@@ -115,11 +115,11 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
 
         assertThat(response.getStatusCode().value()).isEqualTo(201);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getRoomId()).isNotNull(); // Expecting an auto-generated ID
+        assertThat(response.getBody().getId()).isNotNull(); // Expecting an auto-generated ID
         assertThat(response.getBody().getNumber()).isEqualTo("101");
 
         // Assuming it's generated as a proper UUID String now (from default domain model generation)
-        String generatedId = response.getBody().getRoomId();
+        String generatedId = response.getBody().getId();
         UUID uuid;
         try {
            uuid = UUID.fromString(generatedId);
@@ -130,7 +130,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         RoomEntity saved = roomRepository.findById(uuid).orElse(null);
         
         assertThat(saved).isNotNull();
-        assertThat(saved.getRoomNumber()).isEqualTo("101");
+        assertThat(saved.getNumber()).isEqualTo("101");
     }
 
     @Test
@@ -155,7 +155,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
 
         RoomEntity saved = roomRepository.findById(UUID.fromString(customId)).orElse(null);
         assertThat(saved).as("Room should be saved in repository").isNotNull();
-        assertThat(saved.getRoomNumber()).isEqualTo("101");
+        assertThat(saved.getNumber()).isEqualTo("101");
     }
 
     @Test
@@ -182,7 +182,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody().getNumber()).isEqualTo("102");
 
         RoomEntity updated = roomRepository.findById(roomIdUuid).orElseThrow();
-        assertThat(updated.getRoomNumber()).isEqualTo("102");
+        assertThat(updated.getNumber()).isEqualTo("102");
     }
 
     @Test

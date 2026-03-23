@@ -8,12 +8,12 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = RoomEntityMapper.class)
 public interface HotelEntityMapper {
 
-    @Mapping(target = "id", source = "hotelId")
+    @Mapping(target = "id", source = "id")
     @Mapping(target = "city", source = "city") 
     @Mapping(target = "rooms", ignore = true) 
     HotelEntity toEntity(Hotel hotel);
 
-    @Mapping(target = "hotelId", source = "id")
+    @Mapping(target = "id", source = "id")
     @Mapping(target = "city", source = "city") 
     Hotel toDomain(HotelEntity hotelEntity);
 

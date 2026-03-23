@@ -13,14 +13,9 @@ public interface RoomEntityMapper {
 
     @Mapping(target = "hotel", ignore = true)
     @Mapping(target = "id", source = "id", qualifiedByName = "stringToUuid")
-    @Mapping(target = "type", source = "roomTypeId")
-    @Mapping(target = "roomNumber", source = "number")
     RoomEntity toEntity(Room room);
 
     @Mapping(target = "id", source = "id", qualifiedByName = "uuidToString")
-    @Mapping(target = "roomTypeId", source = "type")
-    @Mapping(target = "number", source = "roomNumber")
-    @Mapping(target = "hotelId", source = "hotel.id")
     Room toDomain(RoomEntity roomEntity);
 
     @Named("stringToUuid")

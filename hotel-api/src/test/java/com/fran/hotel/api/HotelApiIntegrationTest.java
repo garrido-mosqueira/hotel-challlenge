@@ -80,7 +80,7 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getName()).isEqualTo("Hotel One");
 
-        HotelEntity saved = hotelRepository.findById(response.getBody().getHotelId().toString()).orElseThrow();
+        HotelEntity saved = hotelRepository.findById(response.getBody().getId()).orElseThrow();
         assertThat(saved.getName()).isEqualTo("Hotel One");
         assertThat(saved.getCity()).isEqualTo("New York");
     }
@@ -97,7 +97,7 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
 
         assertThat(response.getStatusCode().value()).isEqualTo(201);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getHotelId()).isNotNull();
+        assertThat(response.getBody().getId()).isNotNull();
     }
 
     @Test

@@ -7,18 +7,18 @@ import lombok.Setter;
 @Getter
 public class RoomDto {
 
-    private String roomId;
+    private String id;
     private String hotelId;
-    private String roomTypeId;
+    private String typeId;
     private int floor;
     private String number;
     private String name;
     private boolean isAvailable;
 
-    public RoomDto(String roomId, String hotelId, String roomTypeId, int floor, String number, String name, boolean isAvailable) {
-        this.roomId = roomId;
+    public RoomDto(String id, String hotelId, String typeId, int floor, String number, String name, boolean isAvailable) {
+        this.id = id;
         this.hotelId = hotelId;
-        this.roomTypeId = roomTypeId;
+        this.typeId = typeId;
         this.floor = floor;
         this.number = number;
         this.name = name;

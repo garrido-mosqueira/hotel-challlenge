@@ -15,8 +15,8 @@ public class RoomEntity {
     @Id
     @Column(columnDefinition = "uuid")
     private UUID id;
-    private String roomNumber;
-    private String type;
+    private String number;
+    private String typeId;
     private int floor;
     private String name;
     private boolean isAvailable;
@@ -27,18 +27,18 @@ public class RoomEntity {
 
     public RoomEntity() {}
 
-    public RoomEntity(UUID id, String roomNumber, String type, int floor, String name, boolean isAvailable, HotelEntity hotel) {
+    public RoomEntity(UUID id, String number, String typeId, int floor, String name, boolean isAvailable, HotelEntity hotel) {
         this.id = id;
-        this.roomNumber = roomNumber;
-        this.type = type;
+        this.number = number;
+        this.typeId = typeId;
         this.floor = floor;
         this.name = name;
         this.isAvailable = isAvailable;
         this.hotel = hotel;
     }
 
-    public RoomEntity(UUID id, String roomNumber, String type, HotelEntity hotel) {
-        this(id, roomNumber, type, 0, null, true, hotel);
+    public RoomEntity(UUID id, String number, String typeId, HotelEntity hotel) {
+        this(id, number, typeId, 0, null, true, hotel);
     }
 
 }
