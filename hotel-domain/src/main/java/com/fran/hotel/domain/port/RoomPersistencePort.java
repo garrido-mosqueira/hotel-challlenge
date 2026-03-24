@@ -8,6 +8,6 @@ public interface RoomPersistencePort {
     Room findByHotelIdAndRoomId(String hotelId, String roomId);
     Room findById(String roomId);
     List<Room> findByHotelId(String hotelId);
-    Room saveRoom(String hotelId, Room room);
+    Room saveRoom(Room room);
     void deleteRoom(String hotelId, String roomId);
 }

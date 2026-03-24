@@ -9,9 +9,9 @@ public interface RoomUseCase {
 
     List<Room> getRooms(String hotelId);
 
-    Room addRoom(String hotelId, Room room);
+    Room addRoom(Room room);
 
-    Room updateRoom(String hotelId, Room room);
+    Room updateRoom(Room room);
 
     void deleteRoom(String hotelId, String roomId);
 }

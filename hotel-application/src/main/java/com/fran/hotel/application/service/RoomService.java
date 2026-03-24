@@ -30,16 +30,16 @@ public class RoomService implements RoomUseCase {
     }
 
     @Override
-    public Room addRoom(String hotelId, Room room) {
-        Room savedRoom = persistence.saveRoom(hotelId, room);
+    public Room addRoom(Room room) {
+        Room savedRoom = persistence.saveRoom(room);
 
         // Increase inventory for the added room type
         // Example: Update inventory for the next 30 days
         LocalDate start = LocalDate.now();
-        LocalDate end = start.plusDays(30);
+        LocalDate end = start.plusDays(365);
 
         List<RoomTypeInventory> inventories = inventoryPersistence.findByHotelIdAndRoomTypeIdAndDateBetween(
-                hotelId, room.typeId(), start, end);
+                room.hotelId(), room.typeId(), start, end);
 
         List<RoomTypeInventory> updatedInventories = inventories.stream()
                 .map(inv -> new RoomTypeInventory(
@@ -58,8 +58,8 @@ public class RoomService implements RoomUseCase {
     }
 
     @Override
-    public Room updateRoom(String hotelId, Room room) {
-        return persistence.saveRoom(hotelId, room);
+    public Room updateRoom(Room room) {
+        return persistence.saveRoom(room);
     }
 
     @Override
