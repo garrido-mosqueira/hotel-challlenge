@@ -94,7 +94,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity finalH = h;
         HttpClientErrorException exception = catchThrowableOfType(() ->
                 restClient.get()
-                        .uri(baseUrl(finalH.getId()) + "/" + java.util.UUID.randomUUID().toString())
+                        .uri(baseUrl(finalH.getId()) + "/" + UUID.randomUUID())
                         .retrieve()
                         .toBodilessEntity(),
                 HttpClientErrorException.class
@@ -161,6 +161,27 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         RoomEntity saved = roomRepository.findById(UUID.fromString(customId)).orElse(null);
         assertThat(saved).as("Room should be saved in repository").isNotNull();
         assertThat(saved.getNumber()).isEqualTo("101");
+    }
+
+    @Test
+    void createRoom_WhenHotelDoesNotExist_ShouldReturnNotFound() {
+        // Given
+        String nonExistentHotelId = "non-existent-hotel";
+        RoomDto request = new RoomDto(null, nonExistentHotelId, "STANDARD_TYPE", 1, "101", "Standard Room", true);
+
+        // When
+        HttpClientErrorException exception = catchThrowableOfType(() ->
+                        restClient.post()
+                                .uri(baseUrl(nonExistentHotelId))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(request)
+                                .retrieve()
+                                .toBodilessEntity(),
+                HttpClientErrorException.class
+        );
+
+        // Then
+        assertThat(exception.getStatusCode().value()).isEqualTo(404);
     }
 
     @Test

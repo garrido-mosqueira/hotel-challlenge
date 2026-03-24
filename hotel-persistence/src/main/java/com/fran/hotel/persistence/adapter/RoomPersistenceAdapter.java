@@ -1,5 +1,6 @@
 package com.fran.hotel.persistence.adapter;
 
+import com.fran.hotel.domain.exception.HotelNotFoundException;
 import com.fran.hotel.domain.model.Room;
 import com.fran.hotel.domain.port.RoomPersistencePort;
 import com.fran.hotel.persistence.entity.HotelEntity;
@@ -47,10 +48,8 @@ public class RoomPersistenceAdapter implements RoomPersistencePort {
     @Transactional
     public Room saveRoom(Room room) {
         HotelEntity hotel = hotelRepository.findById(room.hotelId())
-                .orElseGet(() -> {
-                    HotelEntity newHotel = new HotelEntity(room.hotelId(), "", "Madrid");
-                    return hotelRepository.save(newHotel);
-                });
+                .orElseThrow(() -> new HotelNotFoundException("Hotel with ID " + room.hotelId() + " not found"));
+
         RoomEntity roomEntity = roomMapper.toEntity(room);
         if (roomEntity.getId() == null) {
             roomEntity.setId(UUID.randomUUID());

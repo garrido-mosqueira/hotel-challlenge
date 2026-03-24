@@ -35,44 +35,44 @@ class RoomServiceInventoryTest {
         String hotelId = "hotel-1";
         Room room = new Room(null, hotelId, "type-1", 1, "101", "Room 101", true);
         Room savedRoom = room.withId("room-1");
-        when(persistence.saveRoom(hotelId, room)).thenReturn(savedRoom);
+        when(persistence.saveRoom(room)).thenReturn(savedRoom);
 
-        LocalDate start = LocalDate.now().plusDays(31);
+        // The implementation uses LocalDate.now(), so we test relative to today.
+        LocalDate start = LocalDate.now();
         LocalDate end = start.plusDays(365);
 
-        // Only one existing inventory record, but 366 dates in the range
+        // One existing inventory record inside the range, other dates have no inventory
         List<RoomTypeInventory> existingInventories = List.of(
-                new RoomTypeInventory("inv-1", hotelId, "type-1", start, 5, 2)
+                new RoomTypeInventory("inv-1", hotelId, "type-1", start.plusDays(10), 5, 2)
         );
 
-        when(inventoryPersistence.findByHotelIdAndRoomTypeIdAndDateBetween(eq(hotelId), eq("type-1"), any(), any()))
+        when(inventoryPersistence.findByHotelIdAndRoomTypeIdAndDateBetween(eq(hotelId), eq("type-1"), eq(start), eq(end)))
                 .thenReturn(existingInventories);
 
         // When
-        roomService.addRoom(hotelId, room);
+        roomService.addRoom(room);
 
         // Then
+        @SuppressWarnings("unchecked")
         ArgumentCaptor<List<RoomTypeInventory>> captor = ArgumentCaptor.forClass(List.class);
         verify(inventoryPersistence).saveAll(captor.capture());
         List<RoomTypeInventory> updated = captor.getValue();
 
-        // 366 dates in [start, end] inclusive? 
-        // start to end is start.datesUntil(end.plusDays(1))
+        // Ensure 366 dates are created/updated
         long expectedDays = start.datesUntil(end.plusDays(1)).count();
         assertThat(updated).hasSize((int) expectedDays);
         
-        // The one that existed should be 6
+        // The one that existed should be increased by 1 (from 5 to 6)
         RoomTypeInventory updatedExisting = updated.stream()
                 .filter(inv -> "inv-1".equals(inv.id()))
                 .findFirst()
                 .orElseThrow();
         assertThat(updatedExisting.totalInventory()).isEqualTo(6);
+        assertThat(updatedExisting.date()).isEqualTo(start.plusDays(10));
 
-        // Others should be 1
+        // The ones that did not exist should be initialized to 1
         updated.stream()
                 .filter(inv -> !"inv-1".equals(inv.id()))
                 .forEach(inv -> assertThat(inv.totalInventory()).isEqualTo(1));
-
-        verify(inventoryPersistence).findByHotelIdAndRoomTypeIdAndDateBetween(eq(hotelId), eq("type-1"), eq(start), eq(end));
     }
 }
