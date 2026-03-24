@@ -1,8 +1,10 @@
 package com.fran.hotel.application.service;
 
+import com.fran.hotel.domain.exception.HotelNotFoundException;
 import com.fran.hotel.domain.exception.RoomNotFoundException;
 import com.fran.hotel.domain.model.Room;
 import com.fran.hotel.domain.model.RoomTypeInventory;
+import com.fran.hotel.domain.port.HotelPersistencePort;
 import com.fran.hotel.domain.port.RoomPersistencePort;
 import com.fran.hotel.domain.port.RoomTypeInventoryPersistencePort;
 import com.fran.hotel.domain.port.RoomUseCase;
@@ -21,10 +23,12 @@ public class RoomService implements RoomUseCase {
     
     private final RoomPersistencePort persistence;
     private final RoomTypeInventoryPersistencePort inventoryPersistence;
+    private final HotelPersistencePort hotelPersistence;
 
-    public RoomService(RoomPersistencePort persistence, RoomTypeInventoryPersistencePort inventoryPersistence) {
+    public RoomService(RoomPersistencePort persistence, RoomTypeInventoryPersistencePort inventoryPersistence, HotelPersistencePort hotelPersistence) {
         this.persistence = persistence;
         this.inventoryPersistence = inventoryPersistence;
+        this.hotelPersistence = hotelPersistence;
     }
 
     @Override
@@ -38,11 +42,18 @@ public class RoomService implements RoomUseCase {
 
     @Override
     public List<Room> getRooms(String hotelId) {
+        if (hotelPersistence.findById(hotelId) == null) {
+            throw new HotelNotFoundException("Hotel with ID " + hotelId + " not found");
+        }
         return persistence.findByHotelId(hotelId);
     }
 
     @Override
     public Room addRoom(Room room) {
+        if (hotelPersistence.findById(room.hotelId()) == null) {
+            throw new HotelNotFoundException("Hotel with ID " + room.hotelId() + " not found");
+        }
+
         Room savedRoom = persistence.saveRoom(room);
 
         LocalDate start = LocalDate.now();
@@ -87,6 +98,9 @@ public class RoomService implements RoomUseCase {
 
     @Override
     public Room updateRoom(Room room) {
+        if (hotelPersistence.findById(room.hotelId()) == null) {
+            throw new HotelNotFoundException("Hotel with ID " + room.hotelId() + " not found");
+        }
         return persistence.saveRoom(room);
     }
 

@@ -1,7 +1,9 @@
 package com.fran.hotel.application.service;
 
+import com.fran.hotel.domain.model.Hotel;
 import com.fran.hotel.domain.model.Room;
 import com.fran.hotel.domain.model.RoomTypeInventory;
+import com.fran.hotel.domain.port.HotelPersistencePort;
 import com.fran.hotel.domain.port.RoomPersistencePort;
 import com.fran.hotel.domain.port.RoomTypeInventoryPersistencePort;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,13 +22,15 @@ class RoomServiceInventoryTest {
 
     private RoomPersistencePort persistence;
     private RoomTypeInventoryPersistencePort inventoryPersistence;
+    private HotelPersistencePort hotelPersistence;
     private RoomService roomService;
 
     @BeforeEach
     void setUp() {
         persistence = mock(RoomPersistencePort.class);
         inventoryPersistence = mock(RoomTypeInventoryPersistencePort.class);
-        roomService = new RoomService(persistence, inventoryPersistence);
+        hotelPersistence = mock(HotelPersistencePort.class);
+        roomService = new RoomService(persistence, inventoryPersistence, hotelPersistence);
     }
 
     @Test
@@ -35,6 +39,8 @@ class RoomServiceInventoryTest {
         String hotelId = "hotel-1";
         Room room = new Room(null, hotelId, "type-1", 1, "101", "Room 101", true);
         Room savedRoom = room.withId("room-1");
+        
+        when(hotelPersistence.findById(hotelId)).thenReturn(new Hotel(hotelId, "Test Hotel", "Madrid"));
         when(persistence.saveRoom(room)).thenReturn(savedRoom);
 
         // The implementation uses LocalDate.now(), so we test relative to today.
