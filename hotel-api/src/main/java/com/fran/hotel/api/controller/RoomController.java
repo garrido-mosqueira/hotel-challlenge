@@ -38,7 +38,7 @@ public class RoomController {
     @PostMapping
     public ResponseEntity<RoomDto> addRoom(@PathVariable String hotelId, @RequestBody RoomDto request) {
         // Inject the hotelId during the mapping phase so the Domain object is complete
-        Room roomToCreate = mapper.toDomain(request).withHotelId(hotelId);
+        Room roomToCreate = mapper.toDomainWithHotelId(request, hotelId);
         var created = useCase.addRoom(roomToCreate);
         
         // Provide the URI of the newly created resource
@@ -52,8 +52,7 @@ public class RoomController {
 
     @PutMapping("/{roomId}")
     public ResponseEntity<RoomDto> updateRoom(@PathVariable String hotelId, @PathVariable String roomId, @RequestBody RoomDto request) {
-        Room roomToUpdate = mapper.toDomain(request);
-        Room room = roomToUpdate.withId(roomId).withHotelId(hotelId);
+        Room room = mapper.toDomainWithIdAndHotelId(request, roomId, hotelId);
         var updated = useCase.updateRoom(room);
         return ResponseEntity.ok(mapper.toDto(updated));
     }

@@ -9,14 +9,4 @@ public record Room(
     String name,
     boolean isAvailable
 ) {
-
-    public Room withId(String id) {
-        return new Room(id, hotelId, typeId, floor, number, name, isAvailable);
-    }
-
-    public Room withHotelId(String hotelId) {
-        return new Room(id, hotelId, typeId, floor, number, name, isAvailable);
-
-    }
-
 }

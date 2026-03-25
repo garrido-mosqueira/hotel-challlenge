@@ -38,7 +38,7 @@ class RoomServiceInventoryTest {
         // Given
         String hotelId = "hotel-1";
         Room room = new Room(null, hotelId, "type-1", 1, "101", "Room 101", true);
-        Room savedRoom = room.withId("room-1");
+        Room savedRoom = new Room("room-1", hotelId, "type-1", 1, "101", "Room 101", true);
         
         when(hotelPersistence.findById(hotelId)).thenReturn(new Hotel(hotelId, "Test Hotel", "Madrid"));
         when(persistence.saveRoom(room)).thenReturn(savedRoom);

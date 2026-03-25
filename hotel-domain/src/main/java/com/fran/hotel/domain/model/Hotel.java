@@ -5,9 +5,4 @@ public record Hotel(
     String name,
     String city
 ) {
-
-    public Hotel withId(String id) {
-        return new Hotel(id, name, city);
-    }
-
 }
