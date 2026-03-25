@@ -1,5 +1,7 @@
 package com.fran.hotel.application.service;
 
+import com.fran.hotel.domain.exception.ReservationException;
+import com.fran.hotel.domain.exception.RoomNotFoundException;
 import com.fran.hotel.domain.model.Reservation;
 import com.fran.hotel.domain.model.ReservationStatus;
 import com.fran.hotel.domain.model.Room;
@@ -38,7 +40,7 @@ public class ReservationService implements ReservationUseCase {
     public Reservation createReservation(Reservation reservation) {
         Room room = roomPersistencePort.findById(reservation.roomId());
         if (room == null) {
-            throw new RuntimeException("Room not found");
+            throw new RoomNotFoundException("Room not found");
         }
 
         List<RoomTypeInventory> inventories = roomTypeInventoryPersistencePort.findByHotelIdAndRoomTypeIdAndDateBetween(
@@ -50,13 +52,13 @@ public class ReservationService implements ReservationUseCase {
 
         long nights = DAYS.between(reservation.checkInDate(), reservation.checkOutDate());
         if (inventories.size() < nights) {
-            throw new RuntimeException("Missing inventory records for the selected dates");
+            throw new ReservationException("Missing inventory records for the selected dates");
         }
 
         boolean hasAvailability = inventories.stream().allMatch(RoomTypeInventory::hasAvailability);
 
         if (!hasAvailability) {
-            throw new RuntimeException("No availability for the selected dates");
+            throw new ReservationException("No availability for the selected dates");
         }
 
         Reservation savedReservation = persistence.save(reservation);
