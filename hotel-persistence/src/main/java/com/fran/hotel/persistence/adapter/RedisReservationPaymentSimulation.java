@@ -1,13 +1,11 @@
 package com.fran.hotel.persistence.adapter;
 
 import com.fran.hotel.domain.model.Reservation;
-import com.fran.hotel.domain.model.ReservationStatus;
 import com.fran.hotel.domain.model.ReservationPayment;
 import com.fran.hotel.domain.port.ReservationPaymentPort;
 import com.fran.hotel.domain.port.ReservationPersistencePort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 

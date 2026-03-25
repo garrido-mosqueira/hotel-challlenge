@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @Setter
 @Getter
 @Entity
@@ -14,8 +12,8 @@ import java.util.UUID;
 public class RoomEntity {
 
     @Id
-    @Column(columnDefinition = "uuid")
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
     private String number;
     @Enumerated(EnumType.STRING)
     private RoomType typeId;
@@ -29,7 +27,7 @@ public class RoomEntity {
 
     public RoomEntity() {}
 
-    public RoomEntity(UUID id, String number, RoomType typeId, int floor, String name, boolean isAvailable, HotelEntity hotel) {
+    public RoomEntity(String id, String number, RoomType typeId, int floor, String name, boolean isAvailable, HotelEntity hotel) {
         this.id = id;
         this.number = number;
         this.typeId = typeId;
@@ -39,7 +37,7 @@ public class RoomEntity {
         this.hotel = hotel;
     }
 
-    public RoomEntity(UUID id, String number, RoomType typeId, HotelEntity hotel) {
+    public RoomEntity(String id, String number, RoomType typeId, HotelEntity hotel) {
         this(id, number, typeId, 0, null, true, hotel);
     }
 

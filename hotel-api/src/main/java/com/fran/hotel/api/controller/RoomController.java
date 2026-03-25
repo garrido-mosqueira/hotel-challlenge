@@ -37,11 +37,9 @@ public class RoomController {
 
     @PostMapping
     public ResponseEntity<RoomDto> addRoom(@PathVariable String hotelId, @RequestBody RoomDto request) {
-        // Inject the hotelId during the mapping phase so the Domain object is complete
         Room roomToCreate = mapper.toDomainWithHotelId(request, hotelId);
         var created = useCase.addRoom(roomToCreate);
-        
-        // Provide the URI of the newly created resource
+
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{roomId}")
                 .buildAndExpand(created.id())

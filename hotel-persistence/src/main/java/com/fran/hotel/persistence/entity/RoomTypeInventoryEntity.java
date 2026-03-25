@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @Table(name = "room_type_inventory")
@@ -18,8 +17,7 @@ public class RoomTypeInventoryEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "uuid")
-    private UUID id;
+    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id")
@@ -31,7 +29,7 @@ public class RoomTypeInventoryEntity {
     private int totalInventory;
     private int totalReserved;
 
-    public RoomTypeInventoryEntity(UUID id, HotelEntity hotel, RoomType roomTypeId, LocalDate date, int totalInventory, int totalReserved) {
+    public RoomTypeInventoryEntity(String id, HotelEntity hotel, RoomType roomTypeId, LocalDate date, int totalInventory, int totalReserved) {
         this.id = id;
         this.hotel = hotel;
         this.roomTypeId = roomTypeId;

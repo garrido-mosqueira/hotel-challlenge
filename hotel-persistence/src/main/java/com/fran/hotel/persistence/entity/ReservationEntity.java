@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Setter
 @Getter
@@ -16,8 +15,7 @@ public class ReservationEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "uuid")
-    private UUID id;
+    private String id;
 
     private String guestId;
     private String roomId;
@@ -31,7 +29,7 @@ public class ReservationEntity {
 
     public ReservationEntity() {}
 
-    public ReservationEntity(UUID id, String guestId, String roomId, String roomName, LocalDate checkInDate, LocalDate checkOutDate, ReservationStatus status) {
+    public ReservationEntity(String id, String guestId, String roomId, String roomName, LocalDate checkInDate, LocalDate checkOutDate, ReservationStatus status) {
         this.id = id;
         this.guestId = guestId;
         this.roomId = roomId;
@@ -41,7 +39,7 @@ public class ReservationEntity {
         this.status = status;
     }
 
-    public ReservationEntity(UUID id, String guestId, String roomId, LocalDate checkInDate, LocalDate checkOutDate, ReservationStatus status) {
+    public ReservationEntity(String id, String guestId, String roomId, LocalDate checkInDate, LocalDate checkOutDate, ReservationStatus status) {
         this(id, guestId, roomId, null, checkInDate, checkOutDate, status);
     }
 
