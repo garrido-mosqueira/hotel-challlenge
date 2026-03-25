@@ -63,6 +63,16 @@ export default function Home() {
     }, 5000);
   };
 
+  const handleError = async (response: Response, defaultMessage: string) => {
+    try {
+      const data = await response.json();
+      const message = data.message || data.error || defaultMessage;
+      showNotification(message, 'error');
+    } catch (e) {
+      showNotification(defaultMessage, 'error');
+    }
+  };
+
   useEffect(() => {
     fetchHotels();
   }, []);
@@ -86,7 +96,8 @@ export default function Home() {
         setHotels(data);
       } else {
         console.error('Expected hotels array but got:', data);
-        showNotification('Failed to load hotels: unexpected data format', 'error');
+        const message = data.message || data.error || 'Failed to load hotels: unexpected data format';
+        showNotification(message, 'error');
         setHotels([]);
       }
     } catch (error) {
@@ -113,7 +124,8 @@ export default function Home() {
         showNotification(`Found ${data.length} hotels`, 'info');
       } else {
         console.error('Expected hotels array but got:', data);
-        showNotification('Search failed: unexpected data format', 'error');
+        const message = data.message || data.error || 'Search failed: unexpected data format';
+        showNotification(message, 'error');
         setHotels([]);
       }
     } catch (error) {
@@ -138,7 +150,7 @@ export default function Home() {
         showNotification('Hotel added successfully!', 'success');
         fetchHotels();
       } else {
-        showNotification('Failed to add hotel', 'error');
+        await handleError(response, 'Failed to add hotel');
       }
     } catch (error) {
       console.error('Failed to add hotel:', error);
@@ -160,7 +172,7 @@ export default function Home() {
         showNotification('Hotel updated successfully!', 'success');
         fetchHotels();
       } else {
-        showNotification('Failed to update hotel', 'error');
+        await handleError(response, 'Failed to update hotel');
       }
     } catch (error) {
       console.error('Failed to update hotel:', error);
@@ -176,7 +188,7 @@ export default function Home() {
         showNotification('Hotel deleted successfully!', 'success');
         fetchHotels();
       } else {
-        showNotification('Failed to delete hotel', 'error');
+        await handleError(response, 'Failed to delete hotel');
       }
     } catch (error) {
       console.error('Failed to delete hotel:', error);
@@ -199,7 +211,8 @@ export default function Home() {
         setRooms(mappedData);
       } else {
         console.error('Expected rooms array but got:', data);
-        showNotification('Failed to load rooms: unexpected data format', 'error');
+        const message = data.message || data.error || 'Failed to load rooms: unexpected data format';
+        showNotification(message, 'error');
         setRooms([]);
       }
     } catch (error) {
@@ -230,7 +243,7 @@ export default function Home() {
         showNotification('Room added successfully!', 'success');
         fetchRooms(selectedHotel.id);
       } else {
-        showNotification('Failed to add room', 'error');
+        await handleError(response, 'Failed to add room');
       }
     } catch (error) {
       console.error('Failed to add room:', error);
@@ -256,7 +269,7 @@ export default function Home() {
         showNotification('Room updated successfully!', 'success');
         fetchRooms(selectedHotel.id);
       } else {
-        showNotification('Failed to update room', 'error');
+        await handleError(response, 'Failed to update room');
       }
     } catch (error) {
       console.error('Failed to update room:', error);
@@ -272,7 +285,7 @@ export default function Home() {
         showNotification('Room deleted successfully!', 'success');
         fetchRooms(selectedHotel.id);
       } else {
-        showNotification('Failed to delete room', 'error');
+        await handleError(response, 'Failed to delete room');
       }
     } catch (error) {
       console.error('Failed to delete room:', error);
@@ -294,7 +307,8 @@ export default function Home() {
         showNotification(`Found ${data.length} reservations`, 'info');
       } else {
         console.error('Expected reservations array but got:', data);
-        showNotification('Failed to load reservations', 'error');
+        const message = data.message || data.error || 'Failed to load reservations';
+        showNotification(message, 'error');
         setReservations([]);
       }
     } catch (error) {
@@ -318,7 +332,7 @@ export default function Home() {
         setNewReservation({ guestId: '', roomId: '', checkInDate: '', checkOutDate: '' });
         showNotification('Reservation created successfully!', 'success');
       } else {
-        showNotification('Failed to create reservation', 'error');
+        await handleError(response, 'Failed to create reservation');
       }
     } catch (error) {
       console.error('Failed to create reservation:', error);
@@ -342,7 +356,7 @@ export default function Home() {
           }
         }
       } else {
-        showNotification('Failed to cancel reservation', 'error');
+        await handleError(response, 'Failed to cancel reservation');
       }
     } catch (error) {
       console.error('Failed to cancel reservation:', error);
