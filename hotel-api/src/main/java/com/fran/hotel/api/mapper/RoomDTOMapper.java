@@ -18,5 +18,6 @@ public interface RoomDTOMapper {
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "hotelId", source = "hotelId")
+    @Mapping(target = "isAvailable", constant = "true")
     Room toDomainWithIdAndHotelId(RoomDto roomDto, String id, String hotelId);
 }
