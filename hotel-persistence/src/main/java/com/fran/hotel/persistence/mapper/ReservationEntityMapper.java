@@ -30,7 +30,6 @@ public abstract class ReservationEntityMapper {
     @Mapping(target = "id", expression = "java(reservationEntity.getId() != null ? reservationEntity.getId().toString() : null)")
     @Mapping(target = "guestId", source = "guestId")
     @Mapping(target = "roomId", source = "roomId")
-    @Mapping(target = "withStatus", ignore = true)
     public abstract Reservation toDomain(ReservationEntity reservationEntity);
 
 }

@@ -1,5 +1,8 @@
 package com.fran.hotel.application.service;
 
+import com.fran.hotel.domain.exception.InvalidReservationStateException;
+import com.fran.hotel.domain.exception.ReservationAlreadyCancelledException;
+import com.fran.hotel.domain.exception.ReservationAvailabilityException;
 import com.fran.hotel.domain.model.Reservation;
 import com.fran.hotel.domain.model.ReservationStatus;
 import com.fran.hotel.domain.model.Room;
@@ -59,7 +62,7 @@ class ReservationServiceTest {
                 .thenReturn(List.of(inventory1, inventory2));
 
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> reservationService.createReservation(reservation));
+        ReservationAvailabilityException exception = assertThrows(ReservationAvailabilityException.class, () -> reservationService.createReservation(reservation));
         assertEquals("No availability for the selected dates", exception.getMessage());
         verify(persistence, never()).save(any());
     }
@@ -81,7 +84,7 @@ class ReservationServiceTest {
                 eq("hotel-1"), eq("type-1"), eq(checkIn), eq(checkOut.minusDays(1))))
                 .thenReturn(List.of(inventory1, inventory2));
 
-        Reservation savedReservation = reservation.withStatus(ReservationStatus.CONFIRMED);
+        Reservation savedReservation = reservation.confirm();
         when(persistence.save(reservation)).thenReturn(savedReservation);
         when(paymentPort.executeReservationPayment(savedReservation)).thenReturn(savedReservation);
 
@@ -92,5 +95,17 @@ class ReservationServiceTest {
         assertNotNull(result);
         verify(persistence).save(reservation);
         verify(paymentPort).executeReservationPayment(savedReservation);
+    }
+
+    @Test
+    void confirmShouldFailWhenCancelled() {
+        Reservation reservation = new Reservation("1", "guest-1", "room-1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CANCELLED);
+        assertThrows(InvalidReservationStateException.class, reservation::confirm);
+    }
+
+    @Test
+    void cancelShouldFailWhenAlreadyCancelled() {
+        Reservation reservation = new Reservation("1", "guest-1", "room-1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CANCELLED);
+        assertThrows(ReservationAlreadyCancelledException.class, reservation::cancel);
     }
 }

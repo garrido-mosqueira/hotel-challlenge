@@ -57,7 +57,7 @@ public class RedisReservationPaymentSimulation implements ReservationPaymentPort
 
     private void simulatePaymentProgress(Reservation reservation) {
         String paymentKey = PROGRESS_REGISTER_PREFIX + reservation.id();
-        Reservation runningReservation = reservation.withStatus(ReservationStatus.PENDING);
+        Reservation runningReservation = reservation.pending();
 
         updateReservationStatus(paymentKey, new ReservationPayment(runningReservation, false, 0));
         persistencePort.save(runningReservation);
@@ -90,10 +90,10 @@ public class RedisReservationPaymentSimulation implements ReservationPaymentPort
 
     private void finalizePaymentProgress(Reservation reservation, int finalProgress, ReservationPayment currentPayment) {
         if (currentPayment != null && currentPayment.isCancelled()) {
-            Reservation cancelledReservation = reservation.withStatus(ReservationStatus.CANCELLED);
+            Reservation cancelledReservation = reservation.cancel();
             persistencePort.save(cancelledReservation);
         } else if (finalProgress > MAX_PROGRESS) {
-            Reservation confirmedReservation = reservation.withStatus(ReservationStatus.CONFIRMED);
+            Reservation confirmedReservation = reservation.confirm();
             persistencePort.save(confirmedReservation);
         }
     }
