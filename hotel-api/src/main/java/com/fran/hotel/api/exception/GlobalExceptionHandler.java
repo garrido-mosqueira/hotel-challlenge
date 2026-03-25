@@ -1,6 +1,7 @@
 package com.fran.hotel.api.exception;
 
 import com.fran.hotel.domain.exception.HotelNotFoundException;
+import com.fran.hotel.domain.exception.ReservationAvailabilityException;
 import com.fran.hotel.domain.exception.RoomNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,14 @@ public class GlobalExceptionHandler {
         response.put("error", "Not Found");
         response.put("message", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ReservationAvailabilityException.class)
+    public ResponseEntity<Map<String, String>> handleReservationAvailabilityException(ReservationAvailabilityException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Conflict");
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
 }
