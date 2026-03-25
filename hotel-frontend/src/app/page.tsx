@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 type Hotel = {
-  hotelId: string;
+  id: string;
   name: string;
   city: string;
 };
@@ -51,7 +51,7 @@ export default function Home() {
 
   useEffect(() => {
     if (selectedHotel) {
-      fetchRooms(selectedHotel.hotelId);
+      fetchRooms(selectedHotel.id);
     } else {
       setRooms([]);
     }
@@ -61,7 +61,8 @@ export default function Home() {
   const fetchHotels = async () => {
     setLoadingHotels(true);
     try {
-      const response = await fetch('/api/hotels');
+      // Use no-cache to ensure we get fresh data from the API
+      const response = await fetch('/api/hotels', { cache: 'no-store' });
       const data = await response.json();
       setHotels(data);
     } catch (error) {
@@ -79,7 +80,7 @@ export default function Home() {
     }
     setLoadingHotels(true);
     try {
-      const response = await fetch(`/api/hotels/search?city=${searchCity}`);
+      const response = await fetch(`/api/hotels/search?city=${searchCity}`, { cache: 'no-store' });
       const data = await response.json();
       setHotels(data);
     } catch (error) {
@@ -110,7 +111,7 @@ export default function Home() {
     e.preventDefault();
     if (!editingHotel) return;
     try {
-      const response = await fetch(`/api/hotels/${editingHotel.hotelId}`, {
+      const response = await fetch(`/api/hotels/${editingHotel.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingHotel),
@@ -128,7 +129,7 @@ export default function Home() {
     try {
       const response = await fetch(`/api/hotels/${hotelId}`, { method: 'DELETE' });
       if (response.ok) {
-        if (selectedHotel?.hotelId === hotelId) setSelectedHotel(null);
+        if (selectedHotel?.id === hotelId) setSelectedHotel(null);
         fetchHotels();
       }
     } catch (error) {
@@ -154,14 +155,14 @@ export default function Home() {
     e.preventDefault();
     if (!selectedHotel) return;
     try {
-      const response = await fetch(`/api/hotels/${selectedHotel.hotelId}/rooms`, {
+      const response = await fetch(`/api/hotels/${selectedHotel.id}/rooms`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newRoom),
       });
       if (response.ok) {
         setNewRoom({ roomNumber: '', type: '', price: 0, available: true });
-        fetchRooms(selectedHotel.hotelId);
+        fetchRooms(selectedHotel.id);
       }
     } catch (error) {
       console.error('Failed to add room:', error);
@@ -172,14 +173,14 @@ export default function Home() {
     e.preventDefault();
     if (!editingRoom || !selectedHotel) return;
     try {
-      const response = await fetch(`/api/hotels/${selectedHotel.hotelId}/rooms/${editingRoom.id}`, {
+      const response = await fetch(`/api/hotels/${selectedHotel.id}/rooms/${editingRoom.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingRoom),
       });
       if (response.ok) {
         setEditingRoom(null);
-        fetchRooms(selectedHotel.hotelId);
+        fetchRooms(selectedHotel.id);
       }
     } catch (error) {
       console.error('Failed to update room:', error);
@@ -189,9 +190,9 @@ export default function Home() {
   const handleDeleteRoom = async (roomId: string) => {
     if (!selectedHotel) return;
     try {
-      const response = await fetch(`/api/hotels/${selectedHotel.hotelId}/rooms/${roomId}`, { method: 'DELETE' });
+      const response = await fetch(`/api/hotels/${selectedHotel.id}/rooms/${roomId}`, { method: 'DELETE' });
       if (response.ok) {
-        fetchRooms(selectedHotel.hotelId);
+        fetchRooms(selectedHotel.id);
       }
     } catch (error) {
       console.error('Failed to delete room:', error);
@@ -303,18 +304,18 @@ export default function Home() {
             {loadingHotels ? <p>Loading...</p> : (
               <ul style={{ listStyle: 'none', padding: 0 }}>
                 {hotels.map(hotel => (
-                  <li key={hotel.hotelId} style={{ 
+                  <li key={hotel.id} style={{ 
                     padding: '0.8rem', borderBottom: '1px solid #eee', 
-                    backgroundColor: selectedHotel?.hotelId === hotel.hotelId ? '#f0f7ff' : 'transparent',
+                    backgroundColor: selectedHotel?.id === hotel.id ? '#f0f7ff' : 'transparent',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                   }}>
                     <div onClick={() => setSelectedHotel(hotel)} style={{ cursor: 'pointer', flex: 1 }}>
                       <strong>{hotel.name}</strong> - {hotel.city} <br/>
-                      <small style={{ color: '#666' }}>ID: {hotel.hotelId}</small>
+                      <small style={{ color: '#666' }}>ID: {hotel.id}</small>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button onClick={() => setEditingHotel(hotel)}>Edit</button>
-                      <button onClick={() => handleDeleteHotel(hotel.hotelId)} style={{ color: 'red' }}>Del</button>
+                      <button onClick={() => handleDeleteHotel(hotel.id)} style={{ color: 'red' }}>Del</button>
                     </div>
                   </li>
                 ))}

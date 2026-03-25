@@ -24,7 +24,7 @@ public class RedisConfiguration {
     @Bean
     public RedisCacheConfiguration cacheConfiguration() {
         return RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(60))
+                .entryTtl(Duration.ofMinutes(1))
                 .disableCachingNullValues()
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(createSerializer()));
     }
@@ -34,11 +34,11 @@ public class RedisConfiguration {
         return (builder) -> builder
                 .withCacheConfiguration("hotelCache",
                         RedisCacheConfiguration.defaultCacheConfig()
-                                .entryTtl(Duration.ofMinutes(10))
+                                .entryTtl(Duration.ofSeconds(10))
                                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(createSerializer())))
                 .withCacheConfiguration("searchCache",
                         RedisCacheConfiguration.defaultCacheConfig()
-                                .entryTtl(Duration.ofMinutes(5))
+                                .entryTtl(Duration.ofSeconds(10))
                                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(createSerializer())));
     }
 

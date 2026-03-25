@@ -225,4 +225,47 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
         assertThat(searchResponse.getBody().stream()
                 .noneMatch(h -> h.getId().equals(id))).isTrue();
     }
+
+    @Test
+    void listHotelsShouldRefreshAfterAdd() {
+        // Populate cache
+        restClient.get().retrieve().toBodilessEntity();
+
+        HotelDto request = new HotelDto(null, "New Hotel", "Chicago");
+        ResponseEntity<HotelDto> createResponse = restClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toEntity(HotelDto.class);
+        String id = createResponse.getBody().getId();
+
+        ResponseEntity<List<HotelDto>> listResponse = restClient.get()
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<HotelDto>>(){});
+
+        assertThat(listResponse.getBody().stream()
+                .anyMatch(h -> h.getId().equals(id))).isTrue();
+    }
+
+    @Test
+    void searchHotelsShouldRefreshAfterAdd() {
+        // Populate search cache for "Chicago"
+        restClient.get().uri("/search?city=Chicago").retrieve().toBodilessEntity();
+
+        HotelDto request = new HotelDto(null, "Chicago Hotel", "Chicago");
+        ResponseEntity<HotelDto> createResponse = restClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toEntity(HotelDto.class);
+        String id = createResponse.getBody().getId();
+
+        ResponseEntity<List<HotelDto>> searchResponse = restClient.get()
+                .uri("/search?city=Chicago")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<HotelDto>>(){});
+
+        assertThat(searchResponse.getBody().stream()
+                .anyMatch(h -> h.getId().equals(id))).isTrue();
+    }
 }
