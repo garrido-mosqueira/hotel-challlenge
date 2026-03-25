@@ -42,13 +42,8 @@ public class HotelController {
 
     @PutMapping("/{id}")
     public ResponseEntity<HotelDto> updateHotel(@PathVariable String id, @RequestBody HotelDto hotelDto) {
-        var hotelToUpdate = mapper.toDomain(hotelDto);
-        var hotel = new com.fran.hotel.domain.model.Hotel(
-                id,
-                hotelToUpdate.name(),
-                hotelToUpdate.city()
-        );
-        var updated = useCase.updateHotel(hotel);
+        var hotelToUpdate = mapper.toDomain(hotelDto).withId(id);
+        var updated = useCase.updateHotel(hotelToUpdate);
         return ResponseEntity.ok(mapper.toDto(updated));
     }
 
