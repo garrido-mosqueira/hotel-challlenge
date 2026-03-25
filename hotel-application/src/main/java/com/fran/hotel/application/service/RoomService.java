@@ -1,97 +1,63 @@
 package com.fran.hotel.application.service;
 
-import com.fran.hotel.domain.exception.HotelNotFoundException;
+import com.fran.hotel.application.inventory.InventoryManager;
+import com.fran.hotel.application.validator.HotelValidator;
 import com.fran.hotel.domain.exception.RoomNotFoundException;
 import com.fran.hotel.domain.model.Room;
-import com.fran.hotel.domain.model.RoomTypeInventory;
 import com.fran.hotel.domain.port.HotelPersistencePort;
 import com.fran.hotel.domain.port.RoomPersistencePort;
 import com.fran.hotel.domain.port.RoomTypeInventoryPersistencePort;
 import com.fran.hotel.domain.port.RoomUseCase;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class RoomService implements RoomUseCase {
 
-    private final RoomPersistencePort persistence;
-    private final RoomTypeInventoryPersistencePort inventoryPersistence;
-    private final HotelPersistencePort hotelPersistence;
+    private final RoomPersistencePort roomPersistence;
+    private final HotelValidator hotelValidator;
+    private final InventoryManager inventoryManager;
 
-    public RoomService(RoomPersistencePort persistence, RoomTypeInventoryPersistencePort inventoryPersistence, HotelPersistencePort hotelPersistence) {
-        this.persistence = persistence;
-        this.inventoryPersistence = inventoryPersistence;
-        this.hotelPersistence = hotelPersistence;
+    public RoomService(RoomPersistencePort roomPersistence,
+                       RoomTypeInventoryPersistencePort inventoryPersistence,
+                       HotelPersistencePort hotelPersistence) {
+        this.roomPersistence = roomPersistence;
+        this.hotelValidator = new HotelValidator(hotelPersistence);
+        this.inventoryManager = new InventoryManager(inventoryPersistence);
     }
 
     @Override
     public Room getRoom(String hotelId, String roomId) {
-        validateHotel(hotelId);
-        return persistence.findByHotelIdAndRoomId(hotelId, roomId)
+        hotelValidator.validateHotelExists(hotelId);
+        return roomPersistence.findByHotelIdAndRoomId(hotelId, roomId)
                 .orElseThrow(() -> new RoomNotFoundException("Room with id " + roomId + " not found for hotel " + hotelId));
     }
 
     @Override
     public List<Room> getRooms(String hotelId) {
-        validateHotel(hotelId);
-        return persistence.findByHotelId(hotelId);
+        hotelValidator.validateHotelExists(hotelId);
+        return roomPersistence.findByHotelId(hotelId);
     }
 
     @Override
     public Room addRoom(Room room) {
-        validateHotel(room.hotelId());
-
-        Room savedRoom = persistence.saveRoom(room);
-
-        updateInventoryForNewRoom(room);
-
+        hotelValidator.validateHotelExists(room.hotelId());
+        
+        Room savedRoom = roomPersistence.saveRoom(room);
+        inventoryManager.initializeInventoryForNewRoom(room);
+        
         return savedRoom;
-    }
-
-    private void updateInventoryForNewRoom(Room room) {
-        LocalDate start = LocalDate.now();
-        LocalDate end = start.plusDays(365);
-
-        List<RoomTypeInventory> existingInventories = inventoryPersistence.findByHotelIdAndRoomTypeIdAndDateBetween(
-                room.hotelId(), room.typeId(), start, end);
-
-        Map<LocalDate, RoomTypeInventory> inventoryByDate = existingInventories.stream()
-                .collect(Collectors.toMap(RoomTypeInventory::date, Function.identity()));
-
-        List<RoomTypeInventory> updatedInventories = start.datesUntil(end.plusDays(1))
-                .map(date -> buildRoomTypeInventory(room, inventoryByDate.get(date), date))
-                .toList();
-
-        inventoryPersistence.saveAll(updatedInventories);
-    }
-
-    private RoomTypeInventory buildRoomTypeInventory(Room room, RoomTypeInventory inventory, LocalDate date) {
-        if (inventory != null) {
-            return inventory.increaseInventory();
-        } else {
-            return RoomTypeInventory.createNew(room.hotelId(), room.typeId(), date);
-        }
     }
 
     @Override
     public Room updateRoom(Room room) {
-        validateHotel(room.hotelId());
-        return persistence.saveRoom(room);
+        hotelValidator.validateHotelExists(room.hotelId());
+        return roomPersistence.saveRoom(room);
     }
 
     @Override
     public void deleteRoom(String hotelId, String roomId) {
-        validateHotel(hotelId);
-        persistence.deleteRoom(hotelId, roomId);
-    }
-
-    private void validateHotel(String hotelId) {
-        if (hotelPersistence.findById(hotelId).isEmpty()) {
-            throw new HotelNotFoundException("Hotel with ID " + hotelId + " not found");
-        }
+        hotelValidator.validateHotelExists(hotelId);
+        roomPersistence.deleteRoom(hotelId, roomId);
     }
 
 }
