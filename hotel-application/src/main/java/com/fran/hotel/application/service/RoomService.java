@@ -10,17 +10,13 @@ import com.fran.hotel.domain.port.RoomTypeInventoryPersistencePort;
 import com.fran.hotel.domain.port.RoomUseCase;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 public class RoomService implements RoomUseCase {
-    
+
     private final RoomPersistencePort persistence;
     private final RoomTypeInventoryPersistencePort inventoryPersistence;
     private final HotelPersistencePort hotelPersistence;
@@ -33,26 +29,29 @@ public class RoomService implements RoomUseCase {
 
     @Override
     public Room getRoom(String hotelId, String roomId) {
+        validateHotel(hotelId);
         return persistence.findByHotelIdAndRoomId(hotelId, roomId)
                 .orElseThrow(() -> new RoomNotFoundException("Room with id " + roomId + " not found for hotel " + hotelId));
     }
 
     @Override
     public List<Room> getRooms(String hotelId) {
-        if (hotelPersistence.findById(hotelId).isEmpty()) {
-            throw new HotelNotFoundException("Hotel with ID " + hotelId + " not found");
-        }
+        validateHotel(hotelId);
         return persistence.findByHotelId(hotelId);
     }
 
     @Override
     public Room addRoom(Room room) {
-        if (hotelPersistence.findById(room.hotelId()).isEmpty()) {
-            throw new HotelNotFoundException("Hotel with ID " + room.hotelId() + " not found");
-        }
+        validateHotel(room.hotelId());
 
         Room savedRoom = persistence.saveRoom(room);
 
+        updateInventoryForNewRoom(room);
+
+        return savedRoom;
+    }
+
+    private void updateInventoryForNewRoom(Room room) {
         LocalDate start = LocalDate.now();
         LocalDate end = start.plusDays(365);
 
@@ -62,48 +61,37 @@ public class RoomService implements RoomUseCase {
         Map<LocalDate, RoomTypeInventory> inventoryByDate = existingInventories.stream()
                 .collect(Collectors.toMap(RoomTypeInventory::date, Function.identity()));
 
-        List<RoomTypeInventory> updatedInventories = Stream.iterate(start, date -> date.plusDays(1))
-                .limit(ChronoUnit.DAYS.between(start, end) + 1)
-                .map(date -> {
-                    RoomTypeInventory inventory = inventoryByDate.get(date);
-                    if (inventory != null) {
-                        return new RoomTypeInventory(
-                                inventory.id(),
-                                inventory.hotelId(),
-                                inventory.roomTypeId(),
-                                inventory.date(),
-                                inventory.totalInventory() + 1,
-                                inventory.totalReserved()
-                        );
-                    } else {
-                        return new RoomTypeInventory(
-                                null, // new inventory, id will be generated
-                                room.hotelId(),
-                                room.typeId(),
-                                date,
-                                1, // New room, so inventory is 1
-                                0
-                        );
-                    }
-                })
-                .collect(toList());
+        List<RoomTypeInventory> updatedInventories = start.datesUntil(end.plusDays(1))
+                .map(date -> buildRoomTypeInventory(room, inventoryByDate.get(date), date))
+                .toList();
 
         inventoryPersistence.saveAll(updatedInventories);
+    }
 
-        return savedRoom;
+    private RoomTypeInventory buildRoomTypeInventory(Room room, RoomTypeInventory inventory, LocalDate date) {
+        if (inventory != null) {
+            return inventory.increaseInventory();
+        } else {
+            return RoomTypeInventory.createNew(room.hotelId(), room.typeId(), date);
+        }
     }
 
     @Override
     public Room updateRoom(Room room) {
-        if (hotelPersistence.findById(room.hotelId()).isEmpty()) {
-            throw new HotelNotFoundException("Hotel with ID " + room.hotelId() + " not found");
-        }
+        validateHotel(room.hotelId());
         return persistence.saveRoom(room);
     }
 
     @Override
     public void deleteRoom(String hotelId, String roomId) {
+        validateHotel(hotelId);
         persistence.deleteRoom(hotelId, roomId);
+    }
+
+    private void validateHotel(String hotelId) {
+        if (hotelPersistence.findById(hotelId).isEmpty()) {
+            throw new HotelNotFoundException("Hotel with ID " + hotelId + " not found");
+        }
     }
 
 }
