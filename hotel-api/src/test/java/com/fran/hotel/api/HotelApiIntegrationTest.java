@@ -171,4 +171,58 @@ class HotelApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody().getFirst().getName()).isEqualTo("Beach Hotel");
         assertThat(response.getBody().getFirst().getCity()).isEqualTo("Miami");
     }
+
+    @Test
+    void listHotelsShouldRefreshAfterUpdate() {
+        HotelDto request = new HotelDto(null, "Initial Name", "City");
+        ResponseEntity<HotelDto> createResponse = restClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toEntity(HotelDto.class);
+        String id = createResponse.getBody().getId();
+
+        // Populate cache
+        restClient.get().retrieve().toBodilessEntity();
+
+        HotelDto updateRequest = new HotelDto(id, "Updated Name", "City");
+        restClient.put()
+                .uri("/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(updateRequest)
+                .retrieve()
+                .toBodilessEntity();
+
+        ResponseEntity<List<HotelDto>> listResponse = restClient.get()
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<HotelDto>>(){});
+
+        assertThat(listResponse.getBody().stream()
+                .filter(h -> h.getId().equals(id))
+                .findFirst().get().getName()).isEqualTo("Updated Name");
+    }
+
+    @Test
+    void searchHotelsShouldRefreshAfterDelete() {
+        HotelDto request = new HotelDto(null, "Search Hotel", "Miami");
+        ResponseEntity<HotelDto> createResponse = restClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toEntity(HotelDto.class);
+        String id = createResponse.getBody().getId();
+
+        // Populate search cache
+        restClient.get().uri("/search?city=Miami").retrieve().toBodilessEntity();
+
+        restClient.delete().uri("/" + id).retrieve().toBodilessEntity();
+
+        ResponseEntity<List<HotelDto>> searchResponse = restClient.get()
+                .uri("/search?city=Miami")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<HotelDto>>(){});
+
+        assertThat(searchResponse.getBody().stream()
+                .noneMatch(h -> h.getId().equals(id))).isTrue();
+    }
 }

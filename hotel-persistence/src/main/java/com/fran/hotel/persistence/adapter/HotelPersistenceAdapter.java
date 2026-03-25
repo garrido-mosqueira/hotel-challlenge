@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -42,7 +43,10 @@ public class HotelPersistenceAdapter implements HotelPersistencePort {
 
     @Override
     @Transactional
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(key = "#hotel.id", condition = "#hotel.id != null"),
+            @CacheEvict(value = "searchCache", allEntries = true)
+    })
     public Hotel save(Hotel hotel) {
         HotelEntity entity = hotelMapper.toEntity(hotel);
         if (entity.getRooms() != null) {
@@ -54,7 +58,10 @@ public class HotelPersistenceAdapter implements HotelPersistencePort {
 
     @Override
     @Transactional
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(key = "#id"),
+            @CacheEvict(value = "searchCache", allEntries = true)
+    })
     public void deleteById(String id) {
         hotelRepository.deleteById(id);
     }
