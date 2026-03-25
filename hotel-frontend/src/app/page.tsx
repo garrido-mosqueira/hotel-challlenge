@@ -27,6 +27,12 @@ type Reservation = {
   status: string;
 };
 
+type Notification = {
+  message: string;
+  type: 'success' | 'error' | 'info';
+  id: number;
+};
+
 export default function Home() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [newHotel, setNewHotel] = useState({ name: '', city: '' });
@@ -45,6 +51,16 @@ export default function Home() {
 
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const id = Date.now();
+    setNotifications(prev => [...prev, { message, type, id }]);
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }, 5000);
+  };
 
   useEffect(() => {
     fetchHotels();
@@ -69,10 +85,12 @@ export default function Home() {
         setHotels(data);
       } else {
         console.error('Expected hotels array but got:', data);
+        showNotification('Failed to load hotels: unexpected data format', 'error');
         setHotels([]);
       }
     } catch (error) {
       console.error('Failed to fetch hotels:', error);
+      showNotification('Failed to fetch hotels', 'error');
       setHotels([]);
     } finally {
       setLoadingHotels(false);
@@ -91,12 +109,15 @@ export default function Home() {
       const data = await response.json();
       if (Array.isArray(data)) {
         setHotels(data);
+        showNotification(`Found ${data.length} hotels`, 'info');
       } else {
         console.error('Expected hotels array but got:', data);
+        showNotification('Search failed: unexpected data format', 'error');
         setHotels([]);
       }
     } catch (error) {
       console.error('Failed to search hotels:', error);
+      showNotification('Failed to search hotels', 'error');
       setHotels([]);
     } finally {
       setLoadingHotels(false);
@@ -113,10 +134,14 @@ export default function Home() {
       });
       if (response.ok) {
         setNewHotel({ name: '', city: '' });
+        showNotification('Hotel added successfully!', 'success');
         fetchHotels();
+      } else {
+        showNotification('Failed to add hotel', 'error');
       }
     } catch (error) {
       console.error('Failed to add hotel:', error);
+      showNotification('Error adding hotel', 'error');
     }
   };
 
@@ -131,10 +156,14 @@ export default function Home() {
       });
       if (response.ok) {
         setEditingHotel(null);
+        showNotification('Hotel updated successfully!', 'success');
         fetchHotels();
+      } else {
+        showNotification('Failed to update hotel', 'error');
       }
     } catch (error) {
       console.error('Failed to update hotel:', error);
+      showNotification('Error updating hotel', 'error');
     }
   };
 
@@ -143,10 +172,14 @@ export default function Home() {
       const response = await fetch(`/api/hotels/${hotelId}`, { method: 'DELETE' });
       if (response.ok) {
         if (selectedHotel?.id === hotelId) setSelectedHotel(null);
+        showNotification('Hotel deleted successfully!', 'success');
         fetchHotels();
+      } else {
+        showNotification('Failed to delete hotel', 'error');
       }
     } catch (error) {
       console.error('Failed to delete hotel:', error);
+      showNotification('Error deleting hotel', 'error');
     }
   };
 
@@ -165,10 +198,12 @@ export default function Home() {
         setRooms(mappedData);
       } else {
         console.error('Expected rooms array but got:', data);
+        showNotification('Failed to load rooms: unexpected data format', 'error');
         setRooms([]);
       }
     } catch (error) {
       console.error('Failed to fetch rooms:', error);
+      showNotification('Failed to fetch rooms', 'error');
       setRooms([]);
     } finally {
       setLoadingRooms(false);
@@ -191,10 +226,14 @@ export default function Home() {
       });
       if (response.ok) {
         setNewRoom({ number: '', typeId: '', floor: 0, name: '', available: true });
+        showNotification('Room added successfully!', 'success');
         fetchRooms(selectedHotel.id);
+      } else {
+        showNotification('Failed to add room', 'error');
       }
     } catch (error) {
       console.error('Failed to add room:', error);
+      showNotification('Error adding room', 'error');
     }
   };
 
@@ -213,10 +252,14 @@ export default function Home() {
       });
       if (response.ok) {
         setEditingRoom(null);
+        showNotification('Room updated successfully!', 'success');
         fetchRooms(selectedHotel.id);
+      } else {
+        showNotification('Failed to update room', 'error');
       }
     } catch (error) {
       console.error('Failed to update room:', error);
+      showNotification('Error updating room', 'error');
     }
   };
 
@@ -225,10 +268,14 @@ export default function Home() {
     try {
       const response = await fetch(`/api/hotels/${selectedHotel.id}/rooms/${roomId}`, { method: 'DELETE' });
       if (response.ok) {
+        showNotification('Room deleted successfully!', 'success');
         fetchRooms(selectedHotel.id);
+      } else {
+        showNotification('Failed to delete room', 'error');
       }
     } catch (error) {
       console.error('Failed to delete room:', error);
+      showNotification('Error deleting room', 'error');
     }
   };
 
@@ -243,12 +290,15 @@ export default function Home() {
       const data = await response.json();
       if (Array.isArray(data)) {
         setReservations(data);
+        showNotification(`Found ${data.length} reservations`, 'info');
       } else {
         console.error('Expected reservations array but got:', data);
+        showNotification('Failed to load reservations', 'error');
         setReservations([]);
       }
     } catch (error) {
       console.error('Failed to fetch reservations:', error);
+      showNotification('Error fetching reservations', 'error');
       setReservations([]);
     } finally {
       setLoadingReservations(false);
@@ -265,10 +315,13 @@ export default function Home() {
       });
       if (response.ok) {
         setNewReservation({ guestId: '', roomId: '', checkInDate: '', checkOutDate: '' });
-        alert('Reservation created successfully!');
+        showNotification('Reservation created successfully!', 'success');
+      } else {
+        showNotification('Failed to create reservation', 'error');
       }
     } catch (error) {
       console.error('Failed to create reservation:', error);
+      showNotification('Error creating reservation', 'error');
     }
   };
 
@@ -276,6 +329,7 @@ export default function Home() {
     try {
       const response = await fetch(`/api/reservations/${id}`, { method: 'DELETE' });
       if (response.ok) {
+        showNotification('Reservation cancelled successfully!', 'success');
         if (userId) {
           // Refresh if user ID is entered
           const refreshResponse = await fetch('/api/reservations', { headers: { 'X-User-Id': userId } });
@@ -286,15 +340,54 @@ export default function Home() {
             setReservations([]);
           }
         }
+      } else {
+        showNotification('Failed to cancel reservation', 'error');
       }
     } catch (error) {
       console.error('Failed to cancel reservation:', error);
+      showNotification('Error cancelling reservation', 'error');
     }
   };
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
       <h1>Hotel Management System - API Testing Tool</h1>
+
+      {/* Notifications */}
+      <div style={{
+        position: 'fixed',
+        top: '1rem',
+        right: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.5rem',
+        zIndex: 1000
+      }}>
+        {notifications.map(n => (
+          <div key={n.id} style={{
+            padding: '1rem',
+            borderRadius: '4px',
+            color: 'white',
+            backgroundColor: n.type === 'success' ? '#4caf50' : n.type === 'error' ? '#f44336' : '#2196f3',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+            minWidth: '250px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span>{n.message}</span>
+            <button onClick={() => setNotifications(prev => prev.filter(notif => notif.id !== n.id))} style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '1.2rem',
+              marginLeft: '1rem'
+            }}>×</button>
+          </div>
+        ))}
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
         
