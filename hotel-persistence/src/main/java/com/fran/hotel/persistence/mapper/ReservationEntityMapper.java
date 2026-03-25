@@ -21,6 +21,7 @@ public abstract class ReservationEntityMapper {
         }
         entity.setGuestId(reservation.guestId());
         entity.setRoomId(reservation.roomId());
+        entity.setRoomName(reservation.roomName());
         entity.setCheckInDate(reservation.checkInDate());
         entity.setCheckOutDate(reservation.checkOutDate());
         entity.setStatus(reservation.status());
@@ -30,6 +31,7 @@ public abstract class ReservationEntityMapper {
     @Mapping(target = "id", expression = "java(reservationEntity.getId() != null ? reservationEntity.getId().toString() : null)")
     @Mapping(target = "guestId", source = "guestId")
     @Mapping(target = "roomId", source = "roomId")
+    @Mapping(target = "roomName", source = "roomName")
     public abstract Reservation toDomain(ReservationEntity reservationEntity);
 
 }

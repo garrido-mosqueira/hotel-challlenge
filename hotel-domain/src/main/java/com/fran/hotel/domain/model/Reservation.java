@@ -12,6 +12,7 @@ public record Reservation(
         String id,
         String guestId,
         String roomId,
+        String roomName,
         LocalDate checkInDate,
         LocalDate checkOutDate,
         ReservationStatus status) {
@@ -20,7 +21,7 @@ public record Reservation(
         if (this.status == ReservationStatus.CANCELLED) {
             throw new InvalidReservationStateException("Cannot confirm a cancelled reservation");
         }
-        return new Reservation(id, guestId, roomId, checkInDate, checkOutDate, ReservationStatus.CONFIRMED);
+        return new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.CONFIRMED);
     }
 
     public Reservation cancel() {
@@ -31,11 +32,11 @@ public record Reservation(
         if (this.status == ReservationStatus.CANCELLED) {
             throw new ReservationAlreadyCancelledException("Reservation is already cancelled");
         }
-        return new Reservation(id, guestId, roomId, checkInDate, checkOutDate, ReservationStatus.CANCELLED);
+        return new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.CANCELLED);
     }
 
     public Reservation pending() {
-        return new Reservation(id, guestId, roomId, checkInDate, checkOutDate, ReservationStatus.PENDING);
+        return new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.PENDING);
     }
 
 }

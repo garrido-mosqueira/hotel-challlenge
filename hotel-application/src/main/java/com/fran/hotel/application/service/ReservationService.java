@@ -42,14 +42,24 @@ public class ReservationService implements ReservationUseCase {
             throw new RoomNotFoundException("Room not found");
         }
 
+        Reservation reservationWithRoomName = new Reservation(
+                reservation.id(),
+                reservation.guestId(),
+                reservation.roomId(),
+                room.name(),
+                reservation.checkInDate(),
+                reservation.checkOutDate(),
+                reservation.status()
+        );
+
         List<RoomTypeInventory> inventories = roomTypeInventoryPersistencePort.findByHotelIdAndRoomTypeIdAndDateBetween(
                 room.hotelId(),
                 room.typeId(),
-                reservation.checkInDate(),
-                reservation.checkOutDate().minusDays(1)
+                reservationWithRoomName.checkInDate(),
+                reservationWithRoomName.checkOutDate().minusDays(1)
         );
 
-        long nights = DAYS.between(reservation.checkInDate(), reservation.checkOutDate());
+        long nights = DAYS.between(reservationWithRoomName.checkInDate(), reservationWithRoomName.checkOutDate());
         if (inventories.size() < nights) {
             throw new ReservationAvailabilityException("Missing inventory records for the selected dates");
         }
@@ -61,16 +71,16 @@ public class ReservationService implements ReservationUseCase {
         }
 
         List<Reservation> overlapping = persistence.findOverlappingReservations(
-                reservation.roomId(),
-                reservation.checkInDate(),
-                reservation.checkOutDate()
+                reservationWithRoomName.roomId(),
+                reservationWithRoomName.checkInDate(),
+                reservationWithRoomName.checkOutDate()
         );
 
         if (!overlapping.isEmpty()) {
             throw new ReservationAvailabilityException("Room is already reserved for the selected dates");
         }
 
-        Reservation savedReservation = persistence.save(reservation);
+        Reservation savedReservation = persistence.save(reservationWithRoomName);
         return paymentPort.executeReservationPayment(savedReservation);
     }
 

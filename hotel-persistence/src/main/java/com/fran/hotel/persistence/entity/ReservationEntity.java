@@ -21,6 +21,7 @@ public class ReservationEntity {
 
     private String guestId;
     private String roomId;
+    private String roomName;
 
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
@@ -30,13 +31,18 @@ public class ReservationEntity {
 
     public ReservationEntity() {}
 
-    public ReservationEntity(UUID id, String guestId, String roomId, LocalDate checkInDate, LocalDate checkOutDate, ReservationStatus status) {
+    public ReservationEntity(UUID id, String guestId, String roomId, String roomName, LocalDate checkInDate, LocalDate checkOutDate, ReservationStatus status) {
         this.id = id;
         this.guestId = guestId;
         this.roomId = roomId;
+        this.roomName = roomName;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
         this.status = status;
+    }
+
+    public ReservationEntity(UUID id, String guestId, String roomId, LocalDate checkInDate, LocalDate checkOutDate, ReservationStatus status) {
+        this(id, guestId, roomId, null, checkInDate, checkOutDate, status);
     }
 
 }

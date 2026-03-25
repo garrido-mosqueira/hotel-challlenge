@@ -50,7 +50,7 @@ class ReservationServiceTest {
         String roomId = "room-1";
         LocalDate checkIn = LocalDate.now();
         LocalDate checkOut = checkIn.plusDays(2);
-        Reservation reservation = new Reservation(null, "guest-1", roomId, checkIn, checkOut, ReservationStatus.PENDING);
+        Reservation reservation = new Reservation(null, "guest-1", roomId, "Room 101", checkIn, checkOut, ReservationStatus.PENDING);
 
         Room room = new Room(roomId, "hotel-1", "type-1", 1, "101", "Room 101", true);
         when(roomPersistencePort.findById(roomId)).thenReturn(room);
@@ -73,7 +73,7 @@ class ReservationServiceTest {
         String roomId = "room-1";
         LocalDate checkIn = LocalDate.now();
         LocalDate checkOut = checkIn.plusDays(2);
-        Reservation reservation = new Reservation(null, "guest-1", roomId, checkIn, checkOut, ReservationStatus.PENDING);
+        Reservation reservation = new Reservation(null, "guest-1", roomId, "Room 101", checkIn, checkOut, ReservationStatus.PENDING);
 
         Room room = new Room(roomId, "hotel-1", "type-1", 1, "101", "Room 101", true);
         when(roomPersistencePort.findById(roomId)).thenReturn(room);
@@ -86,7 +86,7 @@ class ReservationServiceTest {
                 .thenReturn(List.of(inventory1, inventory2));
 
         // Mock overlapping reservation
-        Reservation overlappingReservation = new Reservation("res-2", "guest-2", roomId, checkIn.plusDays(1), checkOut.plusDays(1), ReservationStatus.PENDING);
+        Reservation overlappingReservation = new Reservation("res-2", "guest-2", roomId, "Room 101", checkIn.plusDays(1), checkOut.plusDays(1), ReservationStatus.PENDING);
         when(persistence.findOverlappingReservations(roomId, checkIn, checkOut)).thenReturn(List.of(overlappingReservation));
 
         // When & Then
@@ -101,7 +101,7 @@ class ReservationServiceTest {
         String roomId = "room-1";
         LocalDate checkIn = LocalDate.now();
         LocalDate checkOut = checkIn.plusDays(2);
-        Reservation reservation = new Reservation(null, "guest-1", roomId, checkIn, checkOut, ReservationStatus.PENDING);
+        Reservation reservation = new Reservation(null, "guest-1", roomId, "Room 101", checkIn, checkOut, ReservationStatus.PENDING);
 
         Room room = new Room(roomId, "hotel-1", "type-1", 1, "101", "Room 101", true);
         when(roomPersistencePort.findById(roomId)).thenReturn(room);
@@ -129,13 +129,13 @@ class ReservationServiceTest {
 
     @Test
     void confirmShouldFailWhenCancelled() {
-        Reservation reservation = new Reservation("1", "guest-1", "room-1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CANCELLED);
+        Reservation reservation = new Reservation("1", "guest-1", "room-1", "Room 1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CANCELLED);
         assertThrows(InvalidReservationStateException.class, reservation::confirm);
     }
 
     @Test
     void cancelShouldFailWhenAlreadyCancelled() {
-        Reservation reservation = new Reservation("1", "guest-1", "room-1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CANCELLED);
+        Reservation reservation = new Reservation("1", "guest-1", "room-1", "Room 1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CANCELLED);
         assertThrows(ReservationAlreadyCancelledException.class, reservation::cancel);
     }
 }

@@ -22,6 +22,7 @@ type Reservation = {
   id: string;
   guestId: string;
   roomId: string;
+  roomName: string;
   checkInDate: string;
   checkOutDate: string;
   status: string;
@@ -632,7 +633,7 @@ export default function Home() {
                       <div>
                         <strong>{res.id}</strong> ({res.status}) <br/>
                         <small>{res.checkInDate} to {res.checkOutDate}</small> <br/>
-                        <small style={{ color: '#666' }}>Room: {res.roomId}</small>
+                        <small style={{ color: '#666' }}>Room: {res.roomName || res.roomId}</small>
                       </div>
                       <button onClick={() => handleCancelReservation(res.id)} style={{ color: 'red' }}>Cancel</button>
                     </li>
