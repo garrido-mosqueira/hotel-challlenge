@@ -428,7 +428,21 @@ export default function Home() {
                 {loadingRooms ? <p>Loading...</p> : (
                   <ul style={{ listStyle: 'none', padding: 0 }}>
                     {Array.isArray(rooms) && rooms.map(room => (
-                      <li key={room.id} style={{ padding: '0.8rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <li key={room.id} 
+                        onClick={() => {
+                          setNewReservation({ ...newReservation, roomId: room.id });
+                          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                        }}
+                        style={{ 
+                          padding: '0.8rem', borderBottom: '1px solid #eee', display: 'flex', 
+                          justifyContent: 'space-between', alignItems: 'center', 
+                          cursor: 'pointer',
+                          backgroundColor: newReservation.roomId === room.id ? '#f0fff4' : 'transparent',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = newReservation.roomId === room.id ? '#f0fff4' : '#f9f9f9')}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = newReservation.roomId === room.id ? '#f0fff4' : 'transparent')}
+                      >
                         <div>
                           <strong>Room {room.number}</strong> ({room.typeId}) {room.name && `- ${room.name}`} <br/>
                           <small>Floor: {room.floor}</small> <br/>
@@ -436,12 +450,14 @@ export default function Home() {
                           <small style={{ color: '#666' }}>ID: {room.id}</small>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button onClick={() => {
-                            setNewReservation({ ...newReservation, roomId: room.id });
-                            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                          }}>Book</button>
-                          <button onClick={() => setEditingRoom(room)}>Edit</button>
-                          <button onClick={() => handleDeleteRoom(room.id)} style={{ color: 'red' }}>Del</button>
+                          <button onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingRoom(room);
+                          }}>Edit</button>
+                          <button onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteRoom(room.id);
+                          }} style={{ color: 'red' }}>Del</button>
                         </div>
                       </li>
                     ))}
