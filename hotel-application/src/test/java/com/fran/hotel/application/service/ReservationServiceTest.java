@@ -22,6 +22,7 @@ import org.mockito.MockitoAnnotations;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,7 +56,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(null, "guest-1", roomId, "Room 101", checkIn, checkOut, ReservationStatus.PENDING);
 
         Room room = new Room(roomId, "hotel-1", RoomType.SINGLE, 1, "101", "Room 101", true);
-        when(roomPersistencePort.findById(roomId)).thenReturn(room);
+        when(roomPersistencePort.findById(roomId)).thenReturn(Optional.of(room));
 
         RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", RoomType.SINGLE, checkIn, 1, 1);
         RoomTypeInventory inventory2 = new RoomTypeInventory("inv-2", "hotel-1", RoomType.SINGLE, checkIn.plusDays(1), 1, 0);
@@ -78,7 +79,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(null, "guest-1", roomId, "Room 101", checkIn, checkOut, ReservationStatus.PENDING);
 
         Room room = new Room(roomId, "hotel-1", RoomType.SINGLE, 1, "101", "Room 101", true);
-        when(roomPersistencePort.findById(roomId)).thenReturn(room);
+        when(roomPersistencePort.findById(roomId)).thenReturn(Optional.of(room));
 
         // Assume inventory is available
         RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", RoomType.SINGLE, checkIn, 1, 0);
@@ -106,7 +107,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(null, "guest-1", roomId, "Room 101", checkIn, checkOut, ReservationStatus.PENDING);
 
         Room room = new Room(roomId, "hotel-1", RoomType.SINGLE, 1, "101", "Room 101", true);
-        when(roomPersistencePort.findById(roomId)).thenReturn(room);
+        when(roomPersistencePort.findById(roomId)).thenReturn(Optional.of(room));
 
         RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", RoomType.SINGLE, checkIn, 1, 0);
         RoomTypeInventory inventory2 = new RoomTypeInventory("inv-2", "hotel-1", RoomType.SINGLE, checkIn.plusDays(1), 1, 0);
@@ -145,7 +146,7 @@ class ReservationServiceTest {
     void cancelReservationInServiceShouldFailWhenAlreadyCancelled() {
         String reservationId = "res-1";
         Reservation reservation = new Reservation(reservationId, "guest-1", "room-1", "Room 1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CANCELLED);
-        when(persistence.findById(reservationId)).thenReturn(reservation);
+        when(persistence.findById(reservationId)).thenReturn(Optional.of(reservation));
 
         assertThrows(ReservationAlreadyCancelledException.class, () -> reservationService.cancelReservation(reservationId));
     }
@@ -153,7 +154,7 @@ class ReservationServiceTest {
     @Test
     void cancelReservationInServiceShouldFailWhenNotFound() {
         String reservationId = "non-existent";
-        when(persistence.findById(reservationId)).thenReturn(null);
+        when(persistence.findById(reservationId)).thenReturn(Optional.empty());
 
         assertThrows(ReservationNotFoundException.class, () -> reservationService.cancelReservation(reservationId));
     }

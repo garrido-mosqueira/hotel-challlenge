@@ -3,10 +3,11 @@ package com.fran.hotel.domain.port;
 import com.fran.hotel.domain.model.Hotel;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface HotelPersistencePort {
 
-    Hotel findById(String id);
+    Optional<Hotel> findById(String id);
 
     List<Hotel> findAll();
 

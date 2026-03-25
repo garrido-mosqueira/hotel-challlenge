@@ -14,6 +14,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -27,10 +28,9 @@ public class HotelPersistenceAdapter implements HotelPersistencePort {
 
     @Override
     @Cacheable(key = "#id")
-    public Hotel findById(String id) {
+    public Optional<Hotel> findById(String id) {
         return hotelRepository.findById(id)
-                .map(hotelMapper::toDomain)
-                .orElse(null);
+                .map(hotelMapper::toDomain);
     }
 
     @Override

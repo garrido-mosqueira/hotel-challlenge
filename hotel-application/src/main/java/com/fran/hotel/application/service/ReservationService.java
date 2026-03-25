@@ -33,19 +33,14 @@ public class ReservationService implements ReservationUseCase {
 
     @Override
     public Reservation getReservation(String id) {
-        Reservation reservation = persistence.findById(id);
-        if (reservation == null) {
-            throw new ReservationNotFoundException("Reservation not found with id: " + id);
-        }
-        return reservation;
+        return persistence.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with id: " + id));
     }
 
     @Override
     public Reservation createReservation(Reservation reservation) {
-        Room room = roomPersistencePort.findById(reservation.roomId());
-        if (room == null) {
-            throw new RoomNotFoundException("Room not found");
-        }
+        Room room = roomPersistencePort.findById(reservation.roomId())
+                .orElseThrow(() -> new RoomNotFoundException("Room not found"));
 
         Reservation reservationWithRoomName = new Reservation(
                 reservation.id(),
@@ -91,10 +86,8 @@ public class ReservationService implements ReservationUseCase {
 
     @Override
     public void cancelReservation(String id) {
-        Reservation reservation = persistence.findById(id);
-        if (reservation == null) {
-            throw new ReservationNotFoundException("Reservation not found with id: " + id);
-        }
+        Reservation reservation = persistence.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with id: " + id));
         paymentPort.cancelReservationPayment(id);
         Reservation canceled = reservation.cancel();
         persistence.save(canceled);

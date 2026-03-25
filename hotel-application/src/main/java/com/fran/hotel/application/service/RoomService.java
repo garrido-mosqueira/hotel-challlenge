@@ -33,16 +33,13 @@ public class RoomService implements RoomUseCase {
 
     @Override
     public Room getRoom(String hotelId, String roomId) {
-        Room room = persistence.findByHotelIdAndRoomId(hotelId, roomId);
-        if (room == null) {
-            throw new RoomNotFoundException("Room with id " + roomId + " not found for hotel " + hotelId);
-        }
-        return room;
+        return persistence.findByHotelIdAndRoomId(hotelId, roomId)
+                .orElseThrow(() -> new RoomNotFoundException("Room with id " + roomId + " not found for hotel " + hotelId));
     }
 
     @Override
     public List<Room> getRooms(String hotelId) {
-        if (hotelPersistence.findById(hotelId) == null) {
+        if (hotelPersistence.findById(hotelId).isEmpty()) {
             throw new HotelNotFoundException("Hotel with ID " + hotelId + " not found");
         }
         return persistence.findByHotelId(hotelId);
@@ -50,7 +47,7 @@ public class RoomService implements RoomUseCase {
 
     @Override
     public Room addRoom(Room room) {
-        if (hotelPersistence.findById(room.hotelId()) == null) {
+        if (hotelPersistence.findById(room.hotelId()).isEmpty()) {
             throw new HotelNotFoundException("Hotel with ID " + room.hotelId() + " not found");
         }
 
@@ -98,7 +95,7 @@ public class RoomService implements RoomUseCase {
 
     @Override
     public Room updateRoom(Room room) {
-        if (hotelPersistence.findById(room.hotelId()) == null) {
+        if (hotelPersistence.findById(room.hotelId()).isEmpty()) {
             throw new HotelNotFoundException("Hotel with ID " + room.hotelId() + " not found");
         }
         return persistence.saveRoom(room);

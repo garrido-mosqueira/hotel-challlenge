@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -30,10 +31,9 @@ public class ReservationPersistenceAdapter implements ReservationPersistencePort
     }
 
     @Override
-    public Reservation findById(String id) {
+    public Optional<Reservation> findById(String id) {
         return reservationRepository.findById(id)
-                .map(reservationMapper::toDomain)
-                .orElse(null);
+                .map(reservationMapper::toDomain);
     }
 
     @Override

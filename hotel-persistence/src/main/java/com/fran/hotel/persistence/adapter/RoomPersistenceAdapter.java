@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -22,17 +23,16 @@ public class RoomPersistenceAdapter implements RoomPersistencePort {
     private final RoomEntityMapper roomMapper;
 
     @Override
-    public Room findByHotelIdAndRoomId(String hotelId, String roomId) {
+    public Optional<Room> findByHotelIdAndRoomId(String hotelId, String roomId) {
         RoomEntity roomEntity = roomRepository.findByHotelIdAndRoomId(hotelId, roomId);
-        if (roomEntity == null) return null;
-        return roomMapper.toDomain(roomEntity);
+        if (roomEntity == null) return Optional.empty();
+        return Optional.of(roomMapper.toDomain(roomEntity));
     }
 
     @Override
-    public Room findById(String roomId) {
+    public Optional<Room> findById(String roomId) {
         return roomRepository.findById(roomId)
-                .map(roomMapper::toDomain)
-                .orElse(null);
+                .map(roomMapper::toDomain);
     }
 
     @Override

@@ -17,11 +17,8 @@ public class HotelService implements HotelUseCase {
 
     @Override
     public Hotel getHotel(String id) {
-        Hotel hotel = persistence.findById(id);
-        if (hotel == null) {
-            throw new HotelNotFoundException("Hotel not found with id: " + id);
-        }
-        return hotel;
+        return persistence.findById(id)
+                .orElseThrow(() -> new HotelNotFoundException("Hotel not found with id: " + id));
     }
 
     @Override

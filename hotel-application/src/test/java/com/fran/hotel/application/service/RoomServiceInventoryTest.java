@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,7 +42,7 @@ class RoomServiceInventoryTest {
         Room room = new Room(null, hotelId, RoomType.SINGLE, 1, "101", "Room 101", true);
         Room savedRoom = new Room("room-1", hotelId, RoomType.SINGLE, 1, "101", "Room 101", true);
         
-        when(hotelPersistence.findById(hotelId)).thenReturn(new Hotel(hotelId, "Test Hotel", "Madrid"));
+        when(hotelPersistence.findById(hotelId)).thenReturn(Optional.of(new Hotel(hotelId, "Test Hotel", "Madrid")));
         when(persistence.saveRoom(room)).thenReturn(savedRoom);
 
         // The implementation uses LocalDate.now(), so we test relative to today.
