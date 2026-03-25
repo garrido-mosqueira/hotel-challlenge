@@ -7,6 +7,7 @@ import com.fran.hotel.domain.exception.ReservationNotFoundException;
 import com.fran.hotel.domain.model.Reservation;
 import com.fran.hotel.domain.model.ReservationStatus;
 import com.fran.hotel.domain.model.Room;
+import com.fran.hotel.domain.model.RoomType;
 import com.fran.hotel.domain.model.RoomTypeInventory;
 import com.fran.hotel.domain.port.ReservationPaymentPort;
 import com.fran.hotel.domain.port.ReservationPersistencePort;
@@ -53,13 +54,13 @@ class ReservationServiceTest {
         LocalDate checkOut = checkIn.plusDays(2);
         Reservation reservation = new Reservation(null, "guest-1", roomId, "Room 101", checkIn, checkOut, ReservationStatus.PENDING);
 
-        Room room = new Room(roomId, "hotel-1", "type-1", 1, "101", "Room 101", true);
+        Room room = new Room(roomId, "hotel-1", RoomType.SINGLE, 1, "101", "Room 101", true);
         when(roomPersistencePort.findById(roomId)).thenReturn(room);
 
-        RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", "type-1", checkIn, 1, 1);
-        RoomTypeInventory inventory2 = new RoomTypeInventory("inv-2", "hotel-1", "type-1", checkIn.plusDays(1), 1, 0);
+        RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", RoomType.SINGLE, checkIn, 1, 1);
+        RoomTypeInventory inventory2 = new RoomTypeInventory("inv-2", "hotel-1", RoomType.SINGLE, checkIn.plusDays(1), 1, 0);
         when(roomTypeInventoryPersistencePort.findByHotelIdAndRoomTypeIdAndDateBetween(
-                eq("hotel-1"), eq("type-1"), eq(checkIn), eq(checkOut.minusDays(1))))
+                eq("hotel-1"), eq(RoomType.SINGLE), eq(checkIn), eq(checkOut.minusDays(1))))
                 .thenReturn(List.of(inventory1, inventory2));
 
         // When & Then
@@ -76,14 +77,14 @@ class ReservationServiceTest {
         LocalDate checkOut = checkIn.plusDays(2);
         Reservation reservation = new Reservation(null, "guest-1", roomId, "Room 101", checkIn, checkOut, ReservationStatus.PENDING);
 
-        Room room = new Room(roomId, "hotel-1", "type-1", 1, "101", "Room 101", true);
+        Room room = new Room(roomId, "hotel-1", RoomType.SINGLE, 1, "101", "Room 101", true);
         when(roomPersistencePort.findById(roomId)).thenReturn(room);
 
         // Assume inventory is available
-        RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", "type-1", checkIn, 1, 0);
-        RoomTypeInventory inventory2 = new RoomTypeInventory("inv-2", "hotel-1", "type-1", checkIn.plusDays(1), 1, 0);
+        RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", RoomType.SINGLE, checkIn, 1, 0);
+        RoomTypeInventory inventory2 = new RoomTypeInventory("inv-2", "hotel-1", RoomType.SINGLE, checkIn.plusDays(1), 1, 0);
         when(roomTypeInventoryPersistencePort.findByHotelIdAndRoomTypeIdAndDateBetween(
-                eq("hotel-1"), eq("type-1"), eq(checkIn), eq(checkOut.minusDays(1))))
+                eq("hotel-1"), eq(RoomType.SINGLE), eq(checkIn), eq(checkOut.minusDays(1))))
                 .thenReturn(List.of(inventory1, inventory2));
 
         // Mock overlapping reservation
@@ -104,13 +105,13 @@ class ReservationServiceTest {
         LocalDate checkOut = checkIn.plusDays(2);
         Reservation reservation = new Reservation(null, "guest-1", roomId, "Room 101", checkIn, checkOut, ReservationStatus.PENDING);
 
-        Room room = new Room(roomId, "hotel-1", "type-1", 1, "101", "Room 101", true);
+        Room room = new Room(roomId, "hotel-1", RoomType.SINGLE, 1, "101", "Room 101", true);
         when(roomPersistencePort.findById(roomId)).thenReturn(room);
 
-        RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", "type-1", checkIn, 1, 0);
-        RoomTypeInventory inventory2 = new RoomTypeInventory("inv-2", "hotel-1", "type-1", checkIn.plusDays(1), 1, 0);
+        RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", RoomType.SINGLE, checkIn, 1, 0);
+        RoomTypeInventory inventory2 = new RoomTypeInventory("inv-2", "hotel-1", RoomType.SINGLE, checkIn.plusDays(1), 1, 0);
         when(roomTypeInventoryPersistencePort.findByHotelIdAndRoomTypeIdAndDateBetween(
-                eq("hotel-1"), eq("type-1"), eq(checkIn), eq(checkOut.minusDays(1))))
+                eq("hotel-1"), eq(RoomType.SINGLE), eq(checkIn), eq(checkOut.minusDays(1))))
                 .thenReturn(List.of(inventory1, inventory2));
 
         when(persistence.findOverlappingReservations(roomId, checkIn, checkOut)).thenReturn(Collections.emptyList());

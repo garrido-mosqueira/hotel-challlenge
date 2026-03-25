@@ -19,6 +19,8 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 import java.util.UUID;
 
+import static com.fran.hotel.domain.model.RoomType.DOUBLE;
+import static com.fran.hotel.domain.model.RoomType.SINGLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
@@ -54,8 +56,9 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
 
-        RoomEntity r1 = new RoomEntity(java.util.UUID.randomUUID(), "101", "STANDARD", h);
-        RoomEntity r2 = new RoomEntity(java.util.UUID.randomUUID(), "102", "DELUXE", h);
+        RoomEntity r1 = new RoomEntity(java.util.UUID.randomUUID(), "101", SINGLE, h);
+        RoomEntity r2 = new RoomEntity(java.util.UUID.randomUUID(), "102", DOUBLE, h);
+
         roomRepository.saveAll(List.of(r1, r2));
 
         ResponseEntity<List<RoomDto>> response = restClient.get()
@@ -73,7 +76,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("1", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
         
-        RoomEntity room = new RoomEntity(java.util.UUID.randomUUID(), "101", "STANDARD", h);
+        RoomEntity room = new RoomEntity(java.util.UUID.randomUUID(), "101", SINGLE, h);
         room = roomRepository.save(room);
 
         ResponseEntity<RoomDto> response = restClient.get()
@@ -109,7 +112,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         hotelRepository.save(h);
 
         // Sending a room without an ID
-        RoomDto request = new RoomDto(null, h.getId(), "STANDARD_TYPE", 1, "101", "Standard Room", true);
+        RoomDto request = new RoomDto(null, h.getId(), SINGLE, 1, "101", "Standard Room", true);
 
         ResponseEntity<RoomDto> response = restClient.post()
                 .uri(baseUrl(h.getId()))
@@ -145,7 +148,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
 
         // Instead of pure long string like "123456", use a proper UUID format to avoid parse errors when fetching via ID mapping back to string or long logic
         String customId = UUID.randomUUID().toString();
-        RoomDto request = new RoomDto(customId, h.getId(), "STANDARD_TYPE", 1, "101", "Standard Room", true);
+        RoomDto request = new RoomDto(customId, h.getId(), SINGLE, 1, "101", "Standard Room", true);
 
         ResponseEntity<RoomDto> response = restClient.post()
                 .uri(baseUrl(h.getId()))
@@ -167,7 +170,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
     void createRoom_WhenHotelDoesNotExist_ShouldReturnNotFound() {
         // Given
         String nonExistentHotelId = "non-existent-hotel";
-        RoomDto request = new RoomDto(null, nonExistentHotelId, "STANDARD_TYPE", 1, "101", "Standard Room", true);
+        RoomDto request = new RoomDto(null, nonExistentHotelId, SINGLE, 1, "101", "Standard Room", true);
 
         // When
         HttpClientErrorException exception = catchThrowableOfType(() ->
@@ -190,11 +193,11 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         h = hotelRepository.save(h);
         
         UUID roomIdUuid = UUID.randomUUID();
-        RoomEntity room = new RoomEntity(roomIdUuid, "101", "STANDARD", h);
+        RoomEntity room = new RoomEntity(roomIdUuid, "101", SINGLE, h);
         room = roomRepository.save(room);
 
         String roomIdStr = roomIdUuid.toString();
-        RoomDto request = new RoomDto(roomIdStr, h.getId(), "DELUXE_TYPE", 1, "102", "Deluxe Room", true);
+        RoomDto request = new RoomDto(roomIdStr, h.getId(), DOUBLE, 1, "102", "Deluxe Room", true);
 
         ResponseEntity<RoomDto> response = restClient.put()
                 .uri(baseUrl(h.getId()) + "/" + roomIdStr)
@@ -217,13 +220,13 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         h = hotelRepository.save(h);
 
         UUID roomIdUuid = UUID.randomUUID();
-        RoomEntity room = new RoomEntity(roomIdUuid, "101", "STANDARD", h);
+        RoomEntity room = new RoomEntity(roomIdUuid, "101", SINGLE, h);
         room = roomRepository.save(room);
 
         String roomIdStr = roomIdUuid.toString();
         // Body has a DIFFERENT ID and DIFFERENT hotel ID
         String differentIdStr = UUID.randomUUID().toString();
-        RoomDto request = new RoomDto(differentIdStr, "DIFFERENT_HOTEL", "DELUXE_TYPE", 1, "102", "Deluxe Room", true);
+        RoomDto request = new RoomDto(differentIdStr, "DIFFERENT_HOTEL", DOUBLE, 1, "102", "Deluxe Room", true);
 
         ResponseEntity<RoomDto> response = restClient.put()
                 .uri(baseUrl(h.getId()) + "/" + roomIdStr)
@@ -252,7 +255,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
         
-        RoomEntity room = new RoomEntity(java.util.UUID.randomUUID(), "101", "STANDARD", h);
+        RoomEntity room = new RoomEntity(java.util.UUID.randomUUID(), "101", SINGLE, h);
         room = roomRepository.save(room);
 
         String roomId = room.getId().toString();

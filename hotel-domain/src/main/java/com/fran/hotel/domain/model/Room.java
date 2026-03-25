@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public record Room(
     String id,
     String hotelId,
-    String typeId,
+    RoomType typeId,
     int floor,
     String number,
     String name,

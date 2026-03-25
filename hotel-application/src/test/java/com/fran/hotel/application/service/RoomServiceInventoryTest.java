@@ -2,6 +2,7 @@ package com.fran.hotel.application.service;
 
 import com.fran.hotel.domain.model.Hotel;
 import com.fran.hotel.domain.model.Room;
+import com.fran.hotel.domain.model.RoomType;
 import com.fran.hotel.domain.model.RoomTypeInventory;
 import com.fran.hotel.domain.port.HotelPersistencePort;
 import com.fran.hotel.domain.port.RoomPersistencePort;
@@ -37,8 +38,8 @@ class RoomServiceInventoryTest {
     void addRoomShouldIncreaseInventoryStartingAfter30Days() {
         // Given
         String hotelId = "hotel-1";
-        Room room = new Room(null, hotelId, "type-1", 1, "101", "Room 101", true);
-        Room savedRoom = new Room("room-1", hotelId, "type-1", 1, "101", "Room 101", true);
+        Room room = new Room(null, hotelId, RoomType.SINGLE, 1, "101", "Room 101", true);
+        Room savedRoom = new Room("room-1", hotelId, RoomType.SINGLE, 1, "101", "Room 101", true);
         
         when(hotelPersistence.findById(hotelId)).thenReturn(new Hotel(hotelId, "Test Hotel", "Madrid"));
         when(persistence.saveRoom(room)).thenReturn(savedRoom);
@@ -49,10 +50,10 @@ class RoomServiceInventoryTest {
 
         // One existing inventory record inside the range, other dates have no inventory
         List<RoomTypeInventory> existingInventories = List.of(
-                new RoomTypeInventory("inv-1", hotelId, "type-1", start.plusDays(10), 5, 2)
+                new RoomTypeInventory("inv-1", hotelId, RoomType.SINGLE, start.plusDays(10), 5, 2)
         );
 
-        when(inventoryPersistence.findByHotelIdAndRoomTypeIdAndDateBetween(eq(hotelId), eq("type-1"), eq(start), eq(end)))
+        when(inventoryPersistence.findByHotelIdAndRoomTypeIdAndDateBetween(eq(hotelId), eq(RoomType.SINGLE), eq(start), eq(end)))
                 .thenReturn(existingInventories);
 
         // When

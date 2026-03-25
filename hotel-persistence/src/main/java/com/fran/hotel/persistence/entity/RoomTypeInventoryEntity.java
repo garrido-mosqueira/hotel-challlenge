@@ -1,5 +1,6 @@
 package com.fran.hotel.persistence.entity;
 
+import com.fran.hotel.domain.model.RoomType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,12 +25,13 @@ public class RoomTypeInventoryEntity {
     @JoinColumn(name = "hotel_id")
     private HotelEntity hotel;
 
-    private String roomTypeId;
+    @Enumerated(EnumType.STRING)
+    private RoomType roomTypeId;
     private LocalDate date;
     private int totalInventory;
     private int totalReserved;
 
-    public RoomTypeInventoryEntity(UUID id, HotelEntity hotel, String roomTypeId, LocalDate date, int totalInventory, int totalReserved) {
+    public RoomTypeInventoryEntity(UUID id, HotelEntity hotel, RoomType roomTypeId, LocalDate date, int totalInventory, int totalReserved) {
         this.id = id;
         this.hotel = hotel;
         this.roomTypeId = roomTypeId;

@@ -11,7 +11,7 @@ class RoomTypeInventoryTest {
         RoomTypeInventory inventory = new RoomTypeInventory(
                 "inv-1",
                 "hotel-1",
-                "type-1",
+                RoomType.SINGLE,
                 LocalDate.now(),
                 10,
                 5
@@ -25,7 +25,7 @@ class RoomTypeInventoryTest {
         RoomTypeInventory inventory = new RoomTypeInventory(
                 "inv-1",
                 "hotel-1",
-                "type-1",
+                RoomType.SINGLE,
                 LocalDate.now(),
                 10,
                 10
@@ -39,7 +39,7 @@ class RoomTypeInventoryTest {
         RoomTypeInventory inventory = new RoomTypeInventory(
                 "inv-1",
                 "hotel-1",
-                "type-1",
+                RoomType.SINGLE,
                 LocalDate.now(),
                 10,
                 11

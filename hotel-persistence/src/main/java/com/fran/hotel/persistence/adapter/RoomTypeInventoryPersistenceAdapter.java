@@ -1,5 +1,6 @@
 package com.fran.hotel.persistence.adapter;
 
+import com.fran.hotel.domain.model.RoomType;
 import com.fran.hotel.domain.model.RoomTypeInventory;
 import com.fran.hotel.domain.port.RoomTypeInventoryPersistencePort;
 import com.fran.hotel.persistence.entity.RoomTypeInventoryEntity;
@@ -22,7 +23,7 @@ public class RoomTypeInventoryPersistenceAdapter implements RoomTypeInventoryPer
     private final RoomTypeInventoryEntityMapper mapper;
 
     @Override
-    public List<RoomTypeInventory> findByHotelIdAndRoomTypeIdAndDateBetween(String hotelId, String roomTypeId, LocalDate startDate, LocalDate endDate) {
+    public List<RoomTypeInventory> findByHotelIdAndRoomTypeIdAndDateBetween(String hotelId, RoomType roomTypeId, LocalDate startDate, LocalDate endDate) {
         return repository.findByHotelIdAndRoomTypeIdAndDateBetween(hotelId, roomTypeId, startDate, endDate)
                 .stream()
                 .map(mapper::toDomain)

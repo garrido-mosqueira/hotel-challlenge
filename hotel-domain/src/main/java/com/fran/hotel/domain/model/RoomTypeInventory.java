@@ -8,7 +8,7 @@ import java.time.LocalDate;
 public record RoomTypeInventory(
     String id,
     String hotelId,
-    String roomTypeId,
+    RoomType roomTypeId,
     LocalDate date,
     int totalInventory,
     int totalReserved

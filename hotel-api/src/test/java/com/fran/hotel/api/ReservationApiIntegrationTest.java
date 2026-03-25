@@ -4,6 +4,7 @@ import com.fran.hotel.api.dto.ReservationDto;
 import com.fran.hotel.domain.model.Guest;
 import com.fran.hotel.domain.model.ReservationStatus;
 import com.fran.hotel.domain.model.Room;
+import com.fran.hotel.domain.model.RoomType;
 import com.fran.hotel.persistence.entity.HotelEntity;
 import com.fran.hotel.persistence.entity.ReservationEntity;
 import com.fran.hotel.persistence.entity.RoomEntity;
@@ -49,7 +50,6 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
     private final Guest defaultGuest = new Guest(1L, "John", "Doe", "john.doe@example.com");
     private final String roomIdStr = UUID.randomUUID().toString();
-    private final Room defaultRoom = new Room(null, "1", "STANDARD_TYPE", 1, "101", "Standard Room", true);
 
     private String baseUrl() { return "http://localhost:" + port + "/api/reservations"; }
 
@@ -63,14 +63,14 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity hotel = new HotelEntity("1", "Test Hotel", "Madrid");
         hotelRepository.save(hotel);
 
-        RoomEntity room = new RoomEntity(UUID.randomUUID(), "101", "STANDARD_TYPE", 1, "Standard Room", true, hotel);
+        RoomEntity room = new RoomEntity(UUID.randomUUID(), "101", RoomType.SINGLE, 1, "Standard Room", true, hotel);
         roomRepository.save(room);
 
         LocalDate now = LocalDate.now();
-        roomTypeInventoryRepository.save(new com.fran.hotel.persistence.entity.RoomTypeInventoryEntity(null, hotel, "STANDARD_TYPE", now, 10, 0));
-        roomTypeInventoryRepository.save(new com.fran.hotel.persistence.entity.RoomTypeInventoryEntity(null, hotel, "STANDARD_TYPE", now.plusDays(1), 10, 0));
-        roomTypeInventoryRepository.save(new com.fran.hotel.persistence.entity.RoomTypeInventoryEntity(null, hotel, "STANDARD_TYPE", now.plusDays(2), 10, 0));
-        roomTypeInventoryRepository.save(new com.fran.hotel.persistence.entity.RoomTypeInventoryEntity(null, hotel, "STANDARD_TYPE", now.plusDays(3), 10, 0));
+        roomTypeInventoryRepository.save(new com.fran.hotel.persistence.entity.RoomTypeInventoryEntity(null, hotel, RoomType.SINGLE, now, 10, 0));
+        roomTypeInventoryRepository.save(new com.fran.hotel.persistence.entity.RoomTypeInventoryEntity(null, hotel, RoomType.SINGLE, now.plusDays(1), 10, 0));
+        roomTypeInventoryRepository.save(new com.fran.hotel.persistence.entity.RoomTypeInventoryEntity(null, hotel, RoomType.SINGLE, now.plusDays(2), 10, 0));
+        roomTypeInventoryRepository.save(new com.fran.hotel.persistence.entity.RoomTypeInventoryEntity(null, hotel, RoomType.SINGLE, now.plusDays(3), 10, 0));
 
         restClient = RestClient.builder().baseUrl(baseUrl()).build();
     }

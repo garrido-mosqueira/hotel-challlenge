@@ -42,7 +42,7 @@ export default function Home() {
 
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [newRoom, setNewRoom] = useState({ number: '', typeId: '', floor: 0, name: '', available: true });
+  const [newRoom, setNewRoom] = useState({ number: '', typeId: 'SINGLE', floor: 0, name: '', available: true });
   const [loadingRooms, setLoadingRooms] = useState(false);
 
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -244,7 +244,7 @@ export default function Home() {
         body: JSON.stringify(roomToSubmit),
       });
       if (response.ok) {
-        setNewRoom({ number: '', typeId: '', floor: 0, name: '', available: true });
+        setNewRoom({ number: '', typeId: 'SINGLE', floor: 0, name: '', available: true });
         showNotification('Room added successfully!', 'success');
         fetchRooms(selectedHotel.id);
       } else {
@@ -496,14 +496,16 @@ export default function Home() {
                     required 
                     style={{ padding: '0.5rem' }} 
                   />
-                  <input 
-                    type="text" 
-                    placeholder="Type ID" 
+                  <select 
                     value={editingRoom ? editingRoom.typeId : newRoom.typeId} 
                     onChange={(e) => editingRoom ? setEditingRoom({...editingRoom, typeId: e.target.value}) : setNewRoom({...newRoom, typeId: e.target.value})} 
                     required 
-                    style={{ padding: '0.5rem' }} 
-                  />
+                    style={{ padding: '0.5rem' }}
+                  >
+                    <option value="SINGLE">SINGLE</option>
+                    <option value="DOUBLE">DOUBLE</option>
+                    <option value="PREMIUM">PREMIUM</option>
+                  </select>
                   <input 
                     type="text" 
                     placeholder="Name" 

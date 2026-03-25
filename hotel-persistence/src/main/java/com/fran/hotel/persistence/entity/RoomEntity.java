@@ -1,5 +1,6 @@
 package com.fran.hotel.persistence.entity;
 
+import com.fran.hotel.domain.model.RoomType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +17,8 @@ public class RoomEntity {
     @Column(columnDefinition = "uuid")
     private UUID id;
     private String number;
-    private String typeId;
+    @Enumerated(EnumType.STRING)
+    private RoomType typeId;
     private int floor;
     private String name;
     private boolean isAvailable;
@@ -27,7 +29,7 @@ public class RoomEntity {
 
     public RoomEntity() {}
 
-    public RoomEntity(UUID id, String number, String typeId, int floor, String name, boolean isAvailable, HotelEntity hotel) {
+    public RoomEntity(UUID id, String number, RoomType typeId, int floor, String name, boolean isAvailable, HotelEntity hotel) {
         this.id = id;
         this.number = number;
         this.typeId = typeId;
@@ -37,7 +39,7 @@ public class RoomEntity {
         this.hotel = hotel;
     }
 
-    public RoomEntity(UUID id, String number, String typeId, HotelEntity hotel) {
+    public RoomEntity(UUID id, String number, RoomType typeId, HotelEntity hotel) {
         this(id, number, typeId, 0, null, true, hotel);
     }
 
