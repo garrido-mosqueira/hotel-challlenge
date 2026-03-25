@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -24,14 +23,14 @@ public class RoomPersistenceAdapter implements RoomPersistencePort {
 
     @Override
     public Room findByHotelIdAndRoomId(String hotelId, String roomId) {
-        RoomEntity roomEntity = roomRepository.findByHotelIdAndRoomId(hotelId, UUID.fromString(roomId));
+        RoomEntity roomEntity = roomRepository.findByHotelIdAndRoomId(hotelId, roomId);
         if (roomEntity == null) return null;
         return roomMapper.toDomain(roomEntity);
     }
 
     @Override
     public Room findById(String roomId) {
-        return roomRepository.findById(UUID.fromString(roomId))
+        return roomRepository.findById(roomId)
                 .map(roomMapper::toDomain)
                 .orElse(null);
     }
@@ -50,10 +49,7 @@ public class RoomPersistenceAdapter implements RoomPersistencePort {
                 .orElse(null);
 
         RoomEntity roomEntity = roomMapper.toEntity(room);
-        if (roomEntity.getId() == null) {
-            roomEntity.setId(UUID.randomUUID());
-        }
-        roomEntity.setHotel(hotel); // Could be null if domain didn't validate it properly, but we trust the domain!
+        roomEntity.setHotel(hotel);
         RoomEntity saved = roomRepository.save(roomEntity);
         return roomMapper.toDomain(saved);
     }
@@ -61,7 +57,7 @@ public class RoomPersistenceAdapter implements RoomPersistencePort {
     @Override
     @Transactional
     public void deleteRoom(String hotelId, String roomId) {
-        RoomEntity roomEntity = roomRepository.findByHotelIdAndRoomId(hotelId, UUID.fromString(roomId));
+        RoomEntity roomEntity = roomRepository.findByHotelIdAndRoomId(hotelId, roomId);
         if (roomEntity != null) {
             roomRepository.delete(roomEntity);
         }

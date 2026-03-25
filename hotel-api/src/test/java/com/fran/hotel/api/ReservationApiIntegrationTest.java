@@ -3,7 +3,6 @@ package com.fran.hotel.api;
 import com.fran.hotel.api.dto.ReservationDto;
 import com.fran.hotel.domain.model.Guest;
 import com.fran.hotel.domain.model.ReservationStatus;
-import com.fran.hotel.domain.model.Room;
 import com.fran.hotel.domain.model.RoomType;
 import com.fran.hotel.persistence.entity.HotelEntity;
 import com.fran.hotel.persistence.entity.ReservationEntity;
@@ -63,7 +62,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity hotel = new HotelEntity("1", "Test Hotel", "Madrid");
         hotelRepository.save(hotel);
 
-        RoomEntity room = new RoomEntity(UUID.randomUUID(), "101", RoomType.SINGLE, 1, "Standard Room", true, hotel);
+        RoomEntity room = new RoomEntity(UUID.randomUUID().toString(), "101", RoomType.SINGLE, 1, "Standard Room", true, hotel);
         roomRepository.save(room);
 
         LocalDate now = LocalDate.now();
@@ -90,7 +89,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody().getFirst().getId()).isEqualTo(res1.getId().toString());
+        assertThat(response.getBody().getFirst().getId()).isEqualTo(res1.getId());
     }
 
     @Test
@@ -117,7 +116,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
 
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getId()).isEqualTo(res1.getId().toString());
+        assertThat(response.getBody().getId()).isEqualTo(res1.getId());
         assertThat(response.getBody().getGuestId()).isEqualTo(String.valueOf(defaultGuest.guestId()));
     }
 
@@ -137,7 +136,7 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
     @Test
     void createReservation() {
         RoomEntity room = roomRepository.findAll().getFirst();
-        ReservationDto request = new ReservationDto("provided-id", String.valueOf(defaultGuest.guestId()), room.getId().toString(), LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
+        ReservationDto request = new ReservationDto("provided-id", String.valueOf(defaultGuest.guestId()), room.getId(), LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
 
         ResponseEntity<ReservationDto> response = restClient.post()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -152,9 +151,9 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
         assertThat(createdId).isNotNull();
         assertThat(createdId).isNotEqualTo("provided-id");
 
-        ReservationEntity saved = reservationRepository.findById(UUID.fromString(createdId)).orElseThrow();
+        ReservationEntity saved = reservationRepository.findById(createdId).orElseThrow();
         assertThat(saved.getGuestId()).isEqualTo(String.valueOf(defaultGuest.guestId()));
-        assertThat(saved.getRoomId()).isEqualTo(room.getId().toString());
+        assertThat(saved.getRoomId()).isEqualTo(room.getId());
     }
 
     @Test
@@ -164,12 +163,12 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
         LocalDate checkOut = checkIn.plusDays(2);
         
         // Create an existing reservation
-        ReservationEntity existing = new ReservationEntity(null, "guest-2", room.getId().toString(), checkIn, checkOut, ReservationStatus.PENDING);
+        ReservationEntity existing = new ReservationEntity(null, "guest-2", room.getId(), checkIn, checkOut, ReservationStatus.PENDING);
         reservationRepository.save(existing);
         reservationRepository.flush();
 
         // Try to create an overlapping reservation
-        ReservationDto request = new ReservationDto(null, String.valueOf(defaultGuest.guestId()), room.getId().toString(), checkIn.plusDays(1), checkOut.plusDays(1), ReservationStatus.PENDING);
+        ReservationDto request = new ReservationDto(null, String.valueOf(defaultGuest.guestId()), room.getId(), checkIn.plusDays(1), checkOut.plusDays(1), ReservationStatus.PENDING);
 
         HttpClientErrorException exception = catchThrowableOfType(() ->
             restClient.post()

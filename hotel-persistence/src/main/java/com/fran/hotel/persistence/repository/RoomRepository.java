@@ -6,12 +6,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.UUID;
 
-public interface RoomRepository extends JpaRepository<RoomEntity, UUID> {
+public interface RoomRepository extends JpaRepository<RoomEntity, String> {
 
     @Query("SELECT r FROM RoomEntity r WHERE r.id = :roomId AND r.hotel.id = :hotelId")
-    RoomEntity findByHotelIdAndRoomId(@Param("hotelId") String hotelId, @Param("roomId") UUID id);
+    RoomEntity findByHotelIdAndRoomId(@Param("hotelId") String hotelId, @Param("roomId") String id);
 
     List<RoomEntity> findByHotelId(String hotelId);
 

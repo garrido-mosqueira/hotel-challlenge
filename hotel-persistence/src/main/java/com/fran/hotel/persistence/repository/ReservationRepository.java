@@ -1,15 +1,15 @@
 package com.fran.hotel.persistence.repository;
 
-import com.fran.hotel.persistence.entity.ReservationEntity;
 import com.fran.hotel.domain.model.ReservationStatus;
+import com.fran.hotel.persistence.entity.ReservationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import java.time.LocalDate;
-import java.util.UUID;
 import java.util.List;
 
-public interface ReservationRepository extends JpaRepository<ReservationEntity, UUID> {
+public interface ReservationRepository extends JpaRepository<ReservationEntity, String> {
 
     List<ReservationEntity> findByGuestId(String guestId);
 

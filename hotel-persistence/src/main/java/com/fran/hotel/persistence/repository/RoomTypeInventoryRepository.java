@@ -6,8 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
-public interface RoomTypeInventoryRepository extends JpaRepository<RoomTypeInventoryEntity, UUID> {
+public interface RoomTypeInventoryRepository extends JpaRepository<RoomTypeInventoryEntity, String> {
     List<RoomTypeInventoryEntity> findByHotelIdAndRoomTypeIdAndDateBetween(String hotelId, RoomType roomTypeId, LocalDate startDate, LocalDate endDate);
 }

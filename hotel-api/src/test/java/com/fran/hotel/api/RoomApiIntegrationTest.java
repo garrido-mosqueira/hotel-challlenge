@@ -56,8 +56,8 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
 
-        RoomEntity r1 = new RoomEntity(java.util.UUID.randomUUID(), "101", SINGLE, h);
-        RoomEntity r2 = new RoomEntity(java.util.UUID.randomUUID(), "102", DOUBLE, h);
+        RoomEntity r1 = new RoomEntity(null, "101", SINGLE, h);
+        RoomEntity r2 = new RoomEntity(null, "102", DOUBLE, h);
 
         roomRepository.saveAll(List.of(r1, r2));
 
@@ -76,11 +76,11 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("1", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
         
-        RoomEntity room = new RoomEntity(java.util.UUID.randomUUID(), "101", SINGLE, h);
+        RoomEntity room = new RoomEntity(null, "101", SINGLE, h);
         room = roomRepository.save(room);
 
         ResponseEntity<RoomDto> response = restClient.get()
-                .uri(baseUrl(h.getId()) + "/" + room.getId().toString())
+                .uri(baseUrl(h.getId()) + "/" + room.getId())
                 .retrieve()
                 .toEntity(RoomDto.class);
 
@@ -126,16 +126,9 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody().getId()).isNotNull(); // Expecting an auto-generated ID
         assertThat(response.getBody().getNumber()).isEqualTo("101");
 
-        // Assuming it's generated as a proper UUID String now (from default domain model generation)
         String generatedId = response.getBody().getId();
-        UUID uuid;
-        try {
-           uuid = UUID.fromString(generatedId);
-        } catch (IllegalArgumentException e) {
-           uuid = new UUID(0L, Long.parseLong(generatedId));
-        }
-
-        RoomEntity saved = roomRepository.findById(uuid).orElse(null);
+        
+        RoomEntity saved = roomRepository.findById(generatedId).orElse(null);
         
         assertThat(saved).isNotNull();
         assertThat(saved.getNumber()).isEqualTo("101");
@@ -146,7 +139,6 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("1", "Hotel 10", "Madrid");
         hotelRepository.save(h);
 
-        // Instead of pure long string like "123456", use a proper UUID format to avoid parse errors when fetching via ID mapping back to string or long logic
         String customId = UUID.randomUUID().toString();
         RoomDto request = new RoomDto(customId, h.getId(), SINGLE, 1, "101", "Standard Room", true);
 
@@ -161,7 +153,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getNumber()).isEqualTo("101");
 
-        RoomEntity saved = roomRepository.findById(UUID.fromString(customId)).orElse(null);
+        RoomEntity saved = roomRepository.findById(response.getBody().getId()).orElse(null);
         assertThat(saved).as("Room should be saved in repository").isNotNull();
         assertThat(saved.getNumber()).isEqualTo("101");
     }
@@ -192,15 +184,13 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("1", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
         
-        UUID roomIdUuid = UUID.randomUUID();
-        RoomEntity room = new RoomEntity(roomIdUuid, "101", SINGLE, h);
+        RoomEntity room = new RoomEntity(null, "101", SINGLE, h);
         room = roomRepository.save(room);
 
-        String roomIdStr = roomIdUuid.toString();
-        RoomDto request = new RoomDto(roomIdStr, h.getId(), DOUBLE, 1, "102", "Deluxe Room", true);
+        RoomDto request = new RoomDto(room.getId(), h.getId(), DOUBLE, 1, "102", "Deluxe Room", true);
 
         ResponseEntity<RoomDto> response = restClient.put()
-                .uri(baseUrl(h.getId()) + "/" + roomIdStr)
+                .uri(baseUrl(h.getId()) + "/" + room.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
@@ -210,7 +200,7 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getNumber()).isEqualTo("102");
 
-        RoomEntity updated = roomRepository.findById(roomIdUuid).orElseThrow();
+        RoomEntity updated = roomRepository.findById(room.getId()).orElseThrow();
         assertThat(updated.getNumber()).isEqualTo("102");
     }
 
@@ -219,17 +209,15 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("1", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
 
-        UUID roomIdUuid = UUID.randomUUID();
-        RoomEntity room = new RoomEntity(roomIdUuid, "101", SINGLE, h);
+        RoomEntity room = new RoomEntity(null, "101", SINGLE, h);
         room = roomRepository.save(room);
 
-        String roomIdStr = roomIdUuid.toString();
         // Body has a DIFFERENT ID and DIFFERENT hotel ID
-        String differentIdStr = UUID.randomUUID().toString();
-        RoomDto request = new RoomDto(differentIdStr, "DIFFERENT_HOTEL", DOUBLE, 1, "102", "Deluxe Room", true);
+        String differentId = UUID.randomUUID().toString();
+        RoomDto request = new RoomDto(differentId, "DIFFERENT_HOTEL", DOUBLE, 1, "102", "Deluxe Room", true);
 
         ResponseEntity<RoomDto> response = restClient.put()
-                .uri(baseUrl(h.getId()) + "/" + roomIdStr)
+                .uri(baseUrl(h.getId()) + "/" + room.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
@@ -237,17 +225,17 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
 
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isNotNull();
-        // We expect the room in the path (roomIdStr) to be updated
-        assertThat(response.getBody().getId()).isEqualTo(roomIdStr);
+        // We expect the room in the path (roomId) to be updated
+        assertThat(response.getBody().getId()).isEqualTo(room.getId());
         assertThat(response.getBody().getHotelId()).isEqualTo(h.getId());
         assertThat(response.getBody().getNumber()).isEqualTo("102");
 
-        RoomEntity updated = roomRepository.findById(roomIdUuid).orElseThrow();
+        RoomEntity updated = roomRepository.findById(room.getId()).orElseThrow();
         assertThat(updated.getNumber()).isEqualTo("102");
         assertThat(updated.getHotel().getId()).isEqualTo(h.getId());
         
-        // Ensure no new room was created with differentIdStr
-        assertThat(roomRepository.findById(UUID.fromString(differentIdStr))).isEmpty();
+        // Ensure no new room was created with differentId
+        assertThat(roomRepository.findById(differentId)).isEmpty();
     }
 
     @Test
@@ -255,10 +243,10 @@ class RoomApiIntegrationTest extends TestContainerConfiguration {
         HotelEntity h = new HotelEntity("h10", "Hotel 10", "Madrid");
         h = hotelRepository.save(h);
         
-        RoomEntity room = new RoomEntity(java.util.UUID.randomUUID(), "101", SINGLE, h);
+        RoomEntity room = new RoomEntity(null, "101", SINGLE, h);
         room = roomRepository.save(room);
 
-        String roomId = room.getId().toString();
+        String roomId = room.getId();
         ResponseEntity<Void> response = restClient.delete()
                 .uri(baseUrl(h.getId()) + "/" + roomId)
                 .retrieve()

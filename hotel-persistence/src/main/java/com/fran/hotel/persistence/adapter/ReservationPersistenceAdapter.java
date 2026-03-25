@@ -31,7 +31,7 @@ public class ReservationPersistenceAdapter implements ReservationPersistencePort
 
     @Override
     public Reservation findById(String id) {
-        return reservationRepository.findById(UUID.fromString(id))
+        return reservationRepository.findById(id)
                 .map(reservationMapper::toDomain)
                 .orElse(null);
     }
@@ -47,7 +47,7 @@ public class ReservationPersistenceAdapter implements ReservationPersistencePort
     @Override
     @Transactional
     public void deleteById(String id) {
-        reservationRepository.deleteById(UUID.fromString(id));
+        reservationRepository.deleteById(id);
     }
 
     @Override
