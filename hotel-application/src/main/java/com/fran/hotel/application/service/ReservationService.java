@@ -1,29 +1,32 @@
 package com.fran.hotel.application.service;
 
-import com.fran.hotel.domain.exception.ReservationAvailabilityException;
+import com.fran.hotel.application.assembler.ReservationAssembler;
+import com.fran.hotel.application.validator.AvailabilityChecker;
+import com.fran.hotel.application.validator.ReservationValidator;
 import com.fran.hotel.domain.exception.ReservationNotFoundException;
-import com.fran.hotel.domain.exception.RoomNotFoundException;
 import com.fran.hotel.domain.model.Reservation;
 import com.fran.hotel.domain.model.Room;
-import com.fran.hotel.domain.model.RoomTypeInventory;
 import com.fran.hotel.domain.port.*;
 
 import java.util.List;
-
-import static java.time.temporal.ChronoUnit.DAYS;
 
 public class ReservationService implements ReservationUseCase {
 
     private final ReservationPersistencePort persistence;
     private final ReservationPaymentPort paymentPort;
-    private final RoomPersistencePort roomPersistencePort;
-    private final RoomTypeInventoryPersistencePort roomTypeInventoryPersistencePort;
+    private final ReservationValidator reservationValidator;
+    private final AvailabilityChecker availabilityChecker;
+    private final ReservationAssembler reservationAssembler;
 
-    public ReservationService(ReservationPersistencePort persistence, ReservationPaymentPort paymentPort, RoomPersistencePort roomPersistencePort, RoomTypeInventoryPersistencePort roomTypeInventoryPersistencePort) {
+    public ReservationService(ReservationPersistencePort persistence,
+                              ReservationPaymentPort paymentPort,
+                              RoomPersistencePort roomPersistencePort,
+                              RoomTypeInventoryPersistencePort roomTypeInventoryPersistencePort) {
         this.persistence = persistence;
         this.paymentPort = paymentPort;
-        this.roomPersistencePort = roomPersistencePort;
-        this.roomTypeInventoryPersistencePort = roomTypeInventoryPersistencePort;
+        this.reservationValidator = new ReservationValidator(roomPersistencePort);
+        this.availabilityChecker = new AvailabilityChecker(roomTypeInventoryPersistencePort, persistence);
+        this.reservationAssembler = new ReservationAssembler();
     }
 
     @Override
@@ -39,48 +42,14 @@ public class ReservationService implements ReservationUseCase {
 
     @Override
     public Reservation createReservation(Reservation reservation) {
-        Room room = roomPersistencePort.findById(reservation.roomId())
-                .orElseThrow(() -> new RoomNotFoundException("Room not found"));
-
-        Reservation reservationWithRoomName = new Reservation(
-                reservation.id(),
-                reservation.guestId(),
-                reservation.roomId(),
-                room.name(),
-                reservation.checkInDate(),
-                reservation.checkOutDate(),
-                reservation.status()
-        );
-
-        List<RoomTypeInventory> inventories = roomTypeInventoryPersistencePort.findByHotelIdAndRoomTypeIdAndDateBetween(
-                room.hotelId(),
-                room.typeId(),
-                reservationWithRoomName.checkInDate(),
-                reservationWithRoomName.checkOutDate().minusDays(1)
-        );
-
-        long nights = DAYS.between(reservationWithRoomName.checkInDate(), reservationWithRoomName.checkOutDate());
-        if (inventories.size() < nights) {
-            throw new ReservationAvailabilityException("Missing inventory records for the selected dates");
-        }
-
-        boolean hasAvailability = inventories.stream().allMatch(RoomTypeInventory::hasAvailability);
-
-        if (!hasAvailability) {
-            throw new ReservationAvailabilityException("No availability for the selected dates");
-        }
-
-        List<Reservation> overlapping = persistence.findOverlappingReservations(
-                reservationWithRoomName.roomId(),
-                reservationWithRoomName.checkInDate(),
-                reservationWithRoomName.checkOutDate()
-        );
-
-        if (!overlapping.isEmpty()) {
-            throw new ReservationAvailabilityException("Room is already reserved for the selected dates");
-        }
-
-        Reservation savedReservation = persistence.save(reservationWithRoomName);
+        Room room = reservationValidator.validateRoomExists(reservation.roomId());
+        
+        Reservation enrichedReservation = reservationAssembler.enrichReservationWithRoomName(reservation, room);
+        
+        availabilityChecker.validateInventoryAvailability(enrichedReservation, room);
+        availabilityChecker.validateNoOverlappingReservations(enrichedReservation);
+        
+        Reservation savedReservation = persistence.save(enrichedReservation);
         return paymentPort.executeReservationPayment(savedReservation);
     }
 
