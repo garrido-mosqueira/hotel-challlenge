@@ -1,7 +1,9 @@
 package com.fran.hotel.api.exception;
 
 import com.fran.hotel.domain.exception.HotelNotFoundException;
+import com.fran.hotel.domain.exception.InvalidReservationStateException;
 import com.fran.hotel.domain.exception.ReservationAvailabilityException;
+import com.fran.hotel.domain.exception.ReservationNotFoundException;
 import com.fran.hotel.domain.exception.RoomNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +32,44 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(ReservationNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleReservationNotFoundException(ReservationNotFoundException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Not Found");
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(ReservationAvailabilityException.class)
     public ResponseEntity<Map<String, String>> handleReservationAvailabilityException(ReservationAvailabilityException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", "Conflict");
         response.put("message", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidReservationStateException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidReservationStateException(InvalidReservationStateException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Bad Request");
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Internal Server Error");
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleException(Exception ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Internal Server Error");
+        response.put("message", "An unexpected error occurred: " + ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

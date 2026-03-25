@@ -63,14 +63,23 @@ export default function Home() {
     }, 5000);
   };
 
-  const handleError = async (response: Response, defaultMessage: string) => {
+  const parseErrorMessage = async (response: Response, defaultMessage: string) => {
     try {
-      const data = await response.json();
-      const message = data.message || data.error || defaultMessage;
-      showNotification(message, 'error');
+      const text = await response.text();
+      try {
+        const data = JSON.parse(text);
+        return data.message || data.error || defaultMessage;
+      } catch (e) {
+        return text || response.statusText || defaultMessage;
+      }
     } catch (e) {
-      showNotification(defaultMessage, 'error');
+      return defaultMessage;
     }
+  };
+
+  const handleError = async (response: Response, defaultMessage: string) => {
+    const message = await parseErrorMessage(response, defaultMessage);
+    showNotification(message, 'error');
   };
 
   useEffect(() => {
@@ -89,15 +98,12 @@ export default function Home() {
   const fetchHotels = async () => {
     setLoadingHotels(true);
     try {
-      // Use no-cache to ensure we get fresh data from the API
       const response = await fetch('/api/hotels', { cache: 'no-store' });
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setHotels(data);
+      if (response.ok) {
+        const data = await response.json();
+        setHotels(Array.isArray(data) ? data : []);
       } else {
-        console.error('Expected hotels array but got:', data);
-        const message = data.message || data.error || 'Failed to load hotels: unexpected data format';
-        showNotification(message, 'error');
+        await handleError(response, 'Failed to load hotels');
         setHotels([]);
       }
     } catch (error) {
@@ -118,14 +124,12 @@ export default function Home() {
     setLoadingHotels(true);
     try {
       const response = await fetch(`/api/hotels/search?city=${searchCity}`, { cache: 'no-store' });
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setHotels(data);
-        showNotification(`Found ${data.length} hotels`, 'info');
+      if (response.ok) {
+        const data = await response.json();
+        setHotels(Array.isArray(data) ? data : []);
+        if (Array.isArray(data)) showNotification(`Found ${data.length} hotels`, 'info');
       } else {
-        console.error('Expected hotels array but got:', data);
-        const message = data.message || data.error || 'Search failed: unexpected data format';
-        showNotification(message, 'error');
+        await handleError(response, 'Search failed');
         setHotels([]);
       }
     } catch (error) {
@@ -201,18 +205,19 @@ export default function Home() {
     setLoadingRooms(true);
     try {
       const response = await fetch(`/api/hotels/${hotelId}/rooms`);
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        // Map backend's 'isAvailable' to frontend's 'available'
-        const mappedData = data.map((room: any) => ({
-          ...room,
-          available: room.isAvailable ?? room.available
-        }));
-        setRooms(mappedData);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          const mappedData = data.map((room: any) => ({
+            ...room,
+            available: room.isAvailable ?? room.available
+          }));
+          setRooms(mappedData);
+        } else {
+          setRooms([]);
+        }
       } else {
-        console.error('Expected rooms array but got:', data);
-        const message = data.message || data.error || 'Failed to load rooms: unexpected data format';
-        showNotification(message, 'error');
+        await handleError(response, 'Failed to load rooms');
         setRooms([]);
       }
     } catch (error) {
@@ -301,14 +306,12 @@ export default function Home() {
       const response = await fetch('/api/reservations', {
         headers: { 'X-User-Id': userId }
       });
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setReservations(data);
-        showNotification(`Found ${data.length} reservations`, 'info');
+      if (response.ok) {
+        const data = await response.json();
+        setReservations(Array.isArray(data) ? data : []);
+        if (Array.isArray(data)) showNotification(`Found ${data.length} reservations`, 'info');
       } else {
-        console.error('Expected reservations array but got:', data);
-        const message = data.message || data.error || 'Failed to load reservations';
-        showNotification(message, 'error');
+        await handleError(response, 'Failed to load reservations');
         setReservations([]);
       }
     } catch (error) {

@@ -24,7 +24,6 @@ public class HotelController {
     @GetMapping("/{id}")
     public ResponseEntity<HotelDto> getHotel(@PathVariable String id) {
         var hotel = useCase.getHotel(id);
-        if (hotel == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(mapper.toDto(hotel));
     }
 

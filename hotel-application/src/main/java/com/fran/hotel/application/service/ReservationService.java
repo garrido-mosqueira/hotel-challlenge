@@ -1,6 +1,7 @@
 package com.fran.hotel.application.service;
 
 import com.fran.hotel.domain.exception.ReservationAvailabilityException;
+import com.fran.hotel.domain.exception.ReservationNotFoundException;
 import com.fran.hotel.domain.exception.RoomNotFoundException;
 import com.fran.hotel.domain.model.Reservation;
 import com.fran.hotel.domain.model.Room;
@@ -32,7 +33,11 @@ public class ReservationService implements ReservationUseCase {
 
     @Override
     public Reservation getReservation(String id) {
-        return persistence.findById(id);
+        Reservation reservation = persistence.findById(id);
+        if (reservation == null) {
+            throw new ReservationNotFoundException("Reservation not found with id: " + id);
+        }
+        return reservation;
     }
 
     @Override
@@ -87,11 +92,12 @@ public class ReservationService implements ReservationUseCase {
     @Override
     public void cancelReservation(String id) {
         Reservation reservation = persistence.findById(id);
-        if (reservation != null) {
-            paymentPort.cancelReservationPayment(id);
-            Reservation canceled = reservation.cancel();
-            persistence.save(canceled);
+        if (reservation == null) {
+            throw new ReservationNotFoundException("Reservation not found with id: " + id);
         }
+        paymentPort.cancelReservationPayment(id);
+        Reservation canceled = reservation.cancel();
+        persistence.save(canceled);
     }
 
 }

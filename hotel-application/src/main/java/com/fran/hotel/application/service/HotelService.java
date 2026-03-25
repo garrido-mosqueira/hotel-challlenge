@@ -1,5 +1,6 @@
 package com.fran.hotel.application.service;
 
+import com.fran.hotel.domain.exception.HotelNotFoundException;
 import com.fran.hotel.domain.model.Hotel;
 import com.fran.hotel.domain.port.HotelPersistencePort;
 import com.fran.hotel.domain.port.HotelUseCase;
@@ -16,7 +17,11 @@ public class HotelService implements HotelUseCase {
 
     @Override
     public Hotel getHotel(String id) {
-        return persistence.findById(id);
+        Hotel hotel = persistence.findById(id);
+        if (hotel == null) {
+            throw new HotelNotFoundException("Hotel not found with id: " + id);
+        }
+        return hotel;
     }
 
     @Override

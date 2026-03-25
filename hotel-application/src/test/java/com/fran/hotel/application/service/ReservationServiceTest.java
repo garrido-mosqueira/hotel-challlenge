@@ -3,6 +3,7 @@ package com.fran.hotel.application.service;
 import com.fran.hotel.domain.exception.InvalidReservationStateException;
 import com.fran.hotel.domain.exception.ReservationAlreadyCancelledException;
 import com.fran.hotel.domain.exception.ReservationAvailabilityException;
+import com.fran.hotel.domain.exception.ReservationNotFoundException;
 import com.fran.hotel.domain.model.Reservation;
 import com.fran.hotel.domain.model.ReservationStatus;
 import com.fran.hotel.domain.model.Room;
@@ -137,5 +138,22 @@ class ReservationServiceTest {
     void cancelShouldFailWhenAlreadyCancelled() {
         Reservation reservation = new Reservation("1", "guest-1", "room-1", "Room 1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CANCELLED);
         assertThrows(ReservationAlreadyCancelledException.class, reservation::cancel);
+    }
+
+    @Test
+    void cancelReservationInServiceShouldFailWhenAlreadyCancelled() {
+        String reservationId = "res-1";
+        Reservation reservation = new Reservation(reservationId, "guest-1", "room-1", "Room 1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CANCELLED);
+        when(persistence.findById(reservationId)).thenReturn(reservation);
+
+        assertThrows(ReservationAlreadyCancelledException.class, () -> reservationService.cancelReservation(reservationId));
+    }
+
+    @Test
+    void cancelReservationInServiceShouldFailWhenNotFound() {
+        String reservationId = "non-existent";
+        when(persistence.findById(reservationId)).thenReturn(null);
+
+        assertThrows(ReservationNotFoundException.class, () -> reservationService.cancelReservation(reservationId));
     }
 }

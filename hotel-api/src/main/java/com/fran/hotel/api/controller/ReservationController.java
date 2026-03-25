@@ -30,7 +30,6 @@ public class ReservationController {
     @GetMapping("/{id}")
     public ResponseEntity<ReservationDto> getReservation(@PathVariable String id) {
         var reservation = useCase.getReservation(id);
-        if (reservation == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(mapper.toDto(reservation));
     }
 
