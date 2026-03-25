@@ -1,6 +1,7 @@
 package com.fran.hotel.domain.port;
 
 import com.fran.hotel.domain.model.Reservation;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationPersistencePort {
@@ -8,4 +9,5 @@ public interface ReservationPersistencePort {
     Reservation findById(String id);
     Reservation save(Reservation reservation);
     void deleteById(String id);
+    List<Reservation> findOverlappingReservations(String roomId, LocalDate checkInDate, LocalDate checkOutDate);
 }

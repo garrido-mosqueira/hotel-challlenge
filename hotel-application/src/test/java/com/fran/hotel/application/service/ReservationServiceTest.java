@@ -68,6 +68,34 @@ class ReservationServiceTest {
     }
 
     @Test
+    void createReservationShouldFailWhenOverlapsWithPendingReservation() {
+        // Given
+        String roomId = "room-1";
+        LocalDate checkIn = LocalDate.now();
+        LocalDate checkOut = checkIn.plusDays(2);
+        Reservation reservation = new Reservation(null, "guest-1", roomId, checkIn, checkOut, ReservationStatus.PENDING);
+
+        Room room = new Room(roomId, "hotel-1", "type-1", 1, "101", "Room 101", true);
+        when(roomPersistencePort.findById(roomId)).thenReturn(room);
+
+        // Assume inventory is available
+        RoomTypeInventory inventory1 = new RoomTypeInventory("inv-1", "hotel-1", "type-1", checkIn, 1, 0);
+        RoomTypeInventory inventory2 = new RoomTypeInventory("inv-2", "hotel-1", "type-1", checkIn.plusDays(1), 1, 0);
+        when(roomTypeInventoryPersistencePort.findByHotelIdAndRoomTypeIdAndDateBetween(
+                eq("hotel-1"), eq("type-1"), eq(checkIn), eq(checkOut.minusDays(1))))
+                .thenReturn(List.of(inventory1, inventory2));
+
+        // Mock overlapping reservation
+        Reservation overlappingReservation = new Reservation("res-2", "guest-2", roomId, checkIn.plusDays(1), checkOut.plusDays(1), ReservationStatus.PENDING);
+        when(persistence.findOverlappingReservations(roomId, checkIn, checkOut)).thenReturn(List.of(overlappingReservation));
+
+        // When & Then
+        ReservationAvailabilityException exception = assertThrows(ReservationAvailabilityException.class, () -> reservationService.createReservation(reservation));
+        assertEquals("Room is already reserved for the selected dates", exception.getMessage());
+        verify(persistence, never()).save(any());
+    }
+
+    @Test
     void createReservationShouldSucceedWhenAvailabilityExists() {
         // Given
         String roomId = "room-1";
@@ -83,6 +111,8 @@ class ReservationServiceTest {
         when(roomTypeInventoryPersistencePort.findByHotelIdAndRoomTypeIdAndDateBetween(
                 eq("hotel-1"), eq("type-1"), eq(checkIn), eq(checkOut.minusDays(1))))
                 .thenReturn(List.of(inventory1, inventory2));
+
+        when(persistence.findOverlappingReservations(roomId, checkIn, checkOut)).thenReturn(Collections.emptyList());
 
         Reservation savedReservation = reservation.confirm();
         when(persistence.save(reservation)).thenReturn(savedReservation);

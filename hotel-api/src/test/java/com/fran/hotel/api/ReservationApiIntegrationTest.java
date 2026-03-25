@@ -158,6 +158,33 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
     }
 
     @Test
+    void createReservationShouldFailWhenOverlapping() {
+        RoomEntity room = roomRepository.findAll().getFirst();
+        LocalDate checkIn = LocalDate.now();
+        LocalDate checkOut = checkIn.plusDays(2);
+        
+        // Create an existing reservation
+        ReservationEntity existing = new ReservationEntity(null, "guest-2", room.getId().toString(), checkIn, checkOut, ReservationStatus.PENDING);
+        reservationRepository.save(existing);
+        reservationRepository.flush();
+
+        // Try to create an overlapping reservation
+        ReservationDto request = new ReservationDto(null, String.valueOf(defaultGuest.guestId()), room.getId().toString(), checkIn.plusDays(1), checkOut.plusDays(1), ReservationStatus.PENDING);
+
+        HttpClientErrorException exception = catchThrowableOfType(() ->
+            restClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toBodilessEntity(),
+            HttpClientErrorException.class
+        );
+
+        assertThat(exception.getStatusCode().value()).isEqualTo(409);
+        assertThat(exception.getResponseBodyAsString()).contains("Room is already reserved for the selected dates");
+    }
+
+    @Test
     void cancelReservation() {
         ReservationEntity res1 = new ReservationEntity(null, String.valueOf(defaultGuest.guestId()), roomIdStr, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.PENDING);
         reservationRepository.save(res1);

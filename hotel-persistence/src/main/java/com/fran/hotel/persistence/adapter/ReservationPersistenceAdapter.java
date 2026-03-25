@@ -1,6 +1,7 @@
 package com.fran.hotel.persistence.adapter;
 
 import com.fran.hotel.domain.model.Reservation;
+import com.fran.hotel.domain.model.ReservationStatus;
 import com.fran.hotel.domain.port.ReservationPersistencePort;
 import com.fran.hotel.persistence.entity.ReservationEntity;
 import com.fran.hotel.persistence.mapper.ReservationEntityMapper;
@@ -9,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,6 +48,15 @@ public class ReservationPersistenceAdapter implements ReservationPersistencePort
     @Transactional
     public void deleteById(String id) {
         reservationRepository.deleteById(UUID.fromString(id));
+    }
+
+    @Override
+    public List<Reservation> findOverlappingReservations(String roomId, LocalDate checkInDate, LocalDate checkOutDate) {
+        List<ReservationStatus> overlappingStatuses = List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED);
+        return reservationRepository.findOverlappingReservations(roomId, checkInDate, checkOutDate, overlappingStatuses)
+                .stream()
+                .map(reservationMapper::toDomain)
+                .toList();
     }
 
 }

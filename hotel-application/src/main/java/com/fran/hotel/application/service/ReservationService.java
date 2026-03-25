@@ -60,6 +60,16 @@ public class ReservationService implements ReservationUseCase {
             throw new ReservationAvailabilityException("No availability for the selected dates");
         }
 
+        List<Reservation> overlapping = persistence.findOverlappingReservations(
+                reservation.roomId(),
+                reservation.checkInDate(),
+                reservation.checkOutDate()
+        );
+
+        if (!overlapping.isEmpty()) {
+            throw new ReservationAvailabilityException("Room is already reserved for the selected dates");
+        }
+
         Reservation savedReservation = persistence.save(reservation);
         return paymentPort.executeReservationPayment(savedReservation);
     }
