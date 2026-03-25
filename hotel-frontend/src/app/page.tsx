@@ -11,9 +11,10 @@ type Hotel = {
 type Room = {
   id: string;
   hotelId: string;
-  roomNumber: string;
-  type: string;
-  price: number;
+  number: string;
+  typeId: string;
+  floor: number;
+  name: string;
   available: boolean;
 };
 
@@ -34,7 +35,7 @@ export default function Home() {
 
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [newRoom, setNewRoom] = useState({ roomNumber: '', type: '', price: 0, available: true });
+  const [newRoom, setNewRoom] = useState({ number: '', typeId: '', floor: 0, name: '', available: true });
   const [loadingRooms, setLoadingRooms] = useState(false);
 
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -64,9 +65,15 @@ export default function Home() {
       // Use no-cache to ensure we get fresh data from the API
       const response = await fetch('/api/hotels', { cache: 'no-store' });
       const data = await response.json();
-      setHotels(data);
+      if (Array.isArray(data)) {
+        setHotels(data);
+      } else {
+        console.error('Expected hotels array but got:', data);
+        setHotels([]);
+      }
     } catch (error) {
       console.error('Failed to fetch hotels:', error);
+      setHotels([]);
     } finally {
       setLoadingHotels(false);
     }
@@ -82,9 +89,15 @@ export default function Home() {
     try {
       const response = await fetch(`/api/hotels/search?city=${searchCity}`, { cache: 'no-store' });
       const data = await response.json();
-      setHotels(data);
+      if (Array.isArray(data)) {
+        setHotels(data);
+      } else {
+        console.error('Expected hotels array but got:', data);
+        setHotels([]);
+      }
     } catch (error) {
       console.error('Failed to search hotels:', error);
+      setHotels([]);
     } finally {
       setLoadingHotels(false);
     }
@@ -143,9 +156,20 @@ export default function Home() {
     try {
       const response = await fetch(`/api/hotels/${hotelId}/rooms`);
       const data = await response.json();
-      setRooms(data);
+      if (Array.isArray(data)) {
+        // Map backend's 'isAvailable' to frontend's 'available'
+        const mappedData = data.map((room: any) => ({
+          ...room,
+          available: room.isAvailable ?? room.available
+        }));
+        setRooms(mappedData);
+      } else {
+        console.error('Expected rooms array but got:', data);
+        setRooms([]);
+      }
     } catch (error) {
       console.error('Failed to fetch rooms:', error);
+      setRooms([]);
     } finally {
       setLoadingRooms(false);
     }
@@ -155,13 +179,18 @@ export default function Home() {
     e.preventDefault();
     if (!selectedHotel) return;
     try {
+      // Backend expects 'isAvailable', we map it from 'available'
+      const roomToSubmit = {
+        ...newRoom,
+        isAvailable: newRoom.available
+      };
       const response = await fetch(`/api/hotels/${selectedHotel.id}/rooms`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newRoom),
+        body: JSON.stringify(roomToSubmit),
       });
       if (response.ok) {
-        setNewRoom({ roomNumber: '', type: '', price: 0, available: true });
+        setNewRoom({ number: '', typeId: '', floor: 0, name: '', available: true });
         fetchRooms(selectedHotel.id);
       }
     } catch (error) {
@@ -173,10 +202,14 @@ export default function Home() {
     e.preventDefault();
     if (!editingRoom || !selectedHotel) return;
     try {
+      const roomToSubmit = {
+        ...editingRoom,
+        isAvailable: editingRoom.available
+      };
       const response = await fetch(`/api/hotels/${selectedHotel.id}/rooms/${editingRoom.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingRoom),
+        body: JSON.stringify(roomToSubmit),
       });
       if (response.ok) {
         setEditingRoom(null);
@@ -208,9 +241,15 @@ export default function Home() {
         headers: { 'X-User-Id': userId }
       });
       const data = await response.json();
-      setReservations(data);
+      if (Array.isArray(data)) {
+        setReservations(data);
+      } else {
+        console.error('Expected reservations array but got:', data);
+        setReservations([]);
+      }
     } catch (error) {
       console.error('Failed to fetch reservations:', error);
+      setReservations([]);
     } finally {
       setLoadingReservations(false);
     }
@@ -240,7 +279,12 @@ export default function Home() {
         if (userId) {
           // Refresh if user ID is entered
           const refreshResponse = await fetch('/api/reservations', { headers: { 'X-User-Id': userId } });
-          setReservations(await refreshResponse.json());
+          const data = await refreshResponse.json();
+          if (Array.isArray(data)) {
+            setReservations(data);
+          } else {
+            setReservations([]);
+          }
         }
       }
     } catch (error) {
@@ -303,7 +347,7 @@ export default function Home() {
             <h3>Hotels List</h3>
             {loadingHotels ? <p>Loading...</p> : (
               <ul style={{ listStyle: 'none', padding: 0 }}>
-                {hotels.map(hotel => (
+                {Array.isArray(hotels) && hotels.map(hotel => (
                   <li key={hotel.id} style={{ 
                     padding: '0.8rem', borderBottom: '1px solid #eee', 
                     backgroundColor: selectedHotel?.id === hotel.id ? '#f0f7ff' : 'transparent',
@@ -336,24 +380,32 @@ export default function Home() {
                   <input 
                     type="text" 
                     placeholder="Room Number" 
-                    value={editingRoom ? editingRoom.roomNumber : newRoom.roomNumber} 
-                    onChange={(e) => editingRoom ? setEditingRoom({...editingRoom, roomNumber: e.target.value}) : setNewRoom({...newRoom, roomNumber: e.target.value})} 
+                    value={editingRoom ? editingRoom.number : newRoom.number} 
+                    onChange={(e) => editingRoom ? setEditingRoom({...editingRoom, number: e.target.value}) : setNewRoom({...newRoom, number: e.target.value})} 
                     required 
                     style={{ padding: '0.5rem' }} 
                   />
                   <input 
                     type="text" 
-                    placeholder="Type (e.g. SINGLE, DOUBLE)" 
-                    value={editingRoom ? editingRoom.type : newRoom.type} 
-                    onChange={(e) => editingRoom ? setEditingRoom({...editingRoom, type: e.target.value}) : setNewRoom({...newRoom, type: e.target.value})} 
+                    placeholder="Type ID" 
+                    value={editingRoom ? editingRoom.typeId : newRoom.typeId} 
+                    onChange={(e) => editingRoom ? setEditingRoom({...editingRoom, typeId: e.target.value}) : setNewRoom({...newRoom, typeId: e.target.value})} 
+                    required 
+                    style={{ padding: '0.5rem' }} 
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Name" 
+                    value={editingRoom ? editingRoom.name : newRoom.name} 
+                    onChange={(e) => editingRoom ? setEditingRoom({...editingRoom, name: e.target.value}) : setNewRoom({...newRoom, name: e.target.value})} 
                     required 
                     style={{ padding: '0.5rem' }} 
                   />
                   <input 
                     type="number" 
-                    placeholder="Price" 
-                    value={editingRoom ? editingRoom.price : newRoom.price} 
-                    onChange={(e) => editingRoom ? setEditingRoom({...editingRoom, price: Number(e.target.value)}) : setNewRoom({...newRoom, price: Number(e.target.value)})} 
+                    placeholder="Floor" 
+                    value={editingRoom ? editingRoom.floor : newRoom.floor} 
+                    onChange={(e) => editingRoom ? setEditingRoom({...editingRoom, floor: Number(e.target.value)}) : setNewRoom({...newRoom, floor: Number(e.target.value)})} 
                     required 
                     style={{ padding: '0.5rem' }} 
                   />
@@ -375,10 +427,11 @@ export default function Home() {
                 <h3>Rooms List</h3>
                 {loadingRooms ? <p>Loading...</p> : (
                   <ul style={{ listStyle: 'none', padding: 0 }}>
-                    {rooms.map(room => (
+                    {Array.isArray(rooms) && rooms.map(room => (
                       <li key={room.id} style={{ padding: '0.8rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                          <strong>Room {room.roomNumber}</strong> ({room.type}) - ${room.price} <br/>
+                          <strong>Room {room.number}</strong> ({room.typeId}) {room.name && `- ${room.name}`} <br/>
+                          <small>Floor: {room.floor}</small> <br/>
                           <small style={{ color: room.available ? 'green' : 'red' }}>{room.available ? 'Available' : 'Booked'}</small> <br/>
                           <small style={{ color: '#666' }}>ID: {room.id}</small>
                         </div>
@@ -465,7 +518,7 @@ export default function Home() {
 
               {loadingReservations ? <p>Loading...</p> : (
                 <ul style={{ listStyle: 'none', padding: 0 }}>
-                  {reservations.map(res => (
+                  {Array.isArray(reservations) && reservations.map(res => (
                     <li key={res.id} style={{ padding: '0.8rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <strong>{res.id}</strong> ({res.status}) <br/>
