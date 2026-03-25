@@ -5,6 +5,9 @@ import com.fran.hotel.domain.exception.ReservationAlreadyCancelledException;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public record Reservation(
         String id,
         String guestId,
