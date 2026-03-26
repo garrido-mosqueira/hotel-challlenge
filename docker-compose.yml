@@ -25,6 +25,17 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
   hotel-api:
     build:
       context: ./
@@ -38,6 +49,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/testdb"
       SPRING_DATASOURCE_USERNAME: "test"
@@ -45,6 +58,8 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
       SPRING_DATA_REDIS_HOST: "redis"
       SPRING_DATA_REDIS_PORT: "6379"
+      SPRING_RABBITMQ_HOST: "rabbitmq"
+      SPRING_RABBITMQ_PORT: "5672"
 
 volumes:
   postgres-data: {}

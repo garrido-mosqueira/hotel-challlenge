@@ -14,7 +14,8 @@ public abstract class TestContainerConfiguration {
             .withReuse(true);
 
     static final GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:7-alpine"))
-            .withExposedPorts(6379);
+            .withExposedPorts(6379)
+            .withReuse(true);
 
     static {
         postgres.start();

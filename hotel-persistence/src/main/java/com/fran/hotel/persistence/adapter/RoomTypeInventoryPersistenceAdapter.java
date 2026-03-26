@@ -7,20 +7,22 @@ import com.fran.hotel.persistence.entity.RoomTypeInventoryEntity;
 import com.fran.hotel.persistence.mapper.RoomTypeInventoryEntityMapper;
 import com.fran.hotel.persistence.repository.RoomTypeInventoryRepository;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-@Component
-@RequiredArgsConstructor
 public class RoomTypeInventoryPersistenceAdapter implements RoomTypeInventoryPersistencePort {
 
     private final RoomTypeInventoryRepository repository;
     private final RoomTypeInventoryEntityMapper mapper;
+
+    public RoomTypeInventoryPersistenceAdapter(RoomTypeInventoryRepository repository,
+                                               RoomTypeInventoryEntityMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
 
     @Override
     public List<RoomTypeInventory> findByHotelIdAndRoomTypeIdAndDateBetween(String hotelId, RoomType roomTypeId, LocalDate startDate, LocalDate endDate) {

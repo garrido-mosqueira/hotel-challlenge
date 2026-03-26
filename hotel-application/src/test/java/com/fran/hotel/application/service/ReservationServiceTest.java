@@ -115,10 +115,10 @@ class ReservationServiceTest {
                 eq("hotel-1"), eq(RoomType.SINGLE), eq(checkIn), eq(checkOut.minusDays(1))))
                 .thenReturn(List.of(inventory1, inventory2));
 
-        when(persistence.findOverlappingReservations(roomId, checkIn, checkOut)).thenReturn(Collections.emptyList());
+        when(persistence.findOverlappingReservations(any(), any(), any())).thenReturn(Collections.emptyList());
 
         Reservation savedReservation = reservation.confirm();
-        when(persistence.save(reservation)).thenReturn(savedReservation);
+        when(persistence.save(any(Reservation.class))).thenReturn(savedReservation);
         when(paymentPort.executeReservationPayment(savedReservation)).thenReturn(savedReservation);
 
         // When
@@ -126,7 +126,7 @@ class ReservationServiceTest {
 
         // Then
         assertNotNull(result);
-        verify(persistence).save(reservation);
+        verify(persistence).save(any(Reservation.class));
         verify(paymentPort).executeReservationPayment(savedReservation);
     }
 

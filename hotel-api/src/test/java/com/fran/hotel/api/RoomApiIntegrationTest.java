@@ -1,6 +1,7 @@
 package com.fran.hotel.api;
 
 import com.fran.hotel.api.dto.RoomDto;
+import com.fran.hotel.persistence.TestRabbitMQConfiguration;
 import com.fran.hotel.persistence.entity.HotelEntity;
 import com.fran.hotel.persistence.entity.RoomEntity;
 import com.fran.hotel.persistence.repository.HotelRepository;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
@@ -25,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestRabbitMQConfiguration.class)
 class RoomApiIntegrationTest extends TestContainerConfiguration {
 
     @Autowired
