@@ -10,66 +10,40 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(HotelNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleHotelNotFoundException(HotelNotFoundException ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", "Not Found");
-        response.put("message", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    private record ErrorResponse(String error, String message) {}
+
+    private ResponseEntity<ErrorResponse> buildErrorResponse(String error, String message, HttpStatus status) {
+        return new ResponseEntity<>(new ErrorResponse(error, message), status);
     }
 
-    @ExceptionHandler(RoomNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleRoomNotFoundException(RoomNotFoundException ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", "Not Found");
-        response.put("message", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(ReservationNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleReservationNotFoundException(ReservationNotFoundException ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", "Not Found");
-        response.put("message", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    @ExceptionHandler({HotelNotFoundException.class, RoomNotFoundException.class, ReservationNotFoundException.class})
+    public ResponseEntity<ErrorResponse> handleNotFoundExceptions(Exception ex) {
+        return buildErrorResponse("Not Found", ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ReservationAvailabilityException.class)
-    public ResponseEntity<Map<String, String>> handleReservationAvailabilityException(ReservationAvailabilityException ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", "Conflict");
-        response.put("message", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    public ResponseEntity<ErrorResponse> handleReservationAvailabilityException(ReservationAvailabilityException ex) {
+        return buildErrorResponse("Conflict", ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(InvalidReservationStateException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidReservationStateException(InvalidReservationStateException ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", "Bad Request");
-        response.put("message", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorResponse> handleInvalidReservationStateException(InvalidReservationStateException ex) {
+        return buildErrorResponse("Bad Request", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", "Internal Server Error");
-        response.put("message", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
+        return buildErrorResponse("Internal Server Error", ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleException(Exception ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", "Internal Server Error");
-        response.put("message", "An unexpected error occurred: " + ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        return buildErrorResponse("Internal Server Error", "An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
