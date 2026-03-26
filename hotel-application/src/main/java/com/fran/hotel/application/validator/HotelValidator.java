@@ -1,7 +1,6 @@
 package com.fran.hotel.application.validator;
 
 import com.fran.hotel.domain.exception.HotelNotFoundException;
-import com.fran.hotel.domain.model.Hotel;
 import com.fran.hotel.domain.port.HotelPersistencePort;
 
 public class HotelValidator {
@@ -12,8 +11,8 @@ public class HotelValidator {
         this.hotelPersistencePort = hotelPersistencePort;
     }
 
-    public Hotel validateHotelExists(String hotelId) {
-        return hotelPersistencePort.findById(hotelId)
+    public void validateHotelExists(String hotelId) {
+        hotelPersistencePort.findById(hotelId)
                 .orElseThrow(() -> new HotelNotFoundException("Hotel with ID " + hotelId + " not found"));
     }
 }
