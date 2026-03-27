@@ -28,6 +28,9 @@ public record Reservation(
         if (this.status == ReservationStatus.CONFIRMED) {
             return new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.REFUNDED);
         }
+        if (this.status == ReservationStatus.REFUNDED) {
+            return this;
+        }
         if (this.status == ReservationStatus.CANCELLED) {
             throw new ReservationAlreadyCancelledException("Reservation is already cancelled");
         }

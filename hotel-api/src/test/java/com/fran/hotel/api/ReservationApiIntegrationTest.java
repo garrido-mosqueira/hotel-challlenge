@@ -203,4 +203,21 @@ class ReservationApiIntegrationTest extends TestContainerConfiguration {
         assertThat(deleted.getStatus()).isEqualTo(ReservationStatus.CANCELLED);
     }
 
+    @Test
+    void cancelConfirmedReservationShouldBeRefunded() {
+        ReservationEntity res1 = new ReservationEntity(null, String.valueOf(defaultGuest.guestId()), roomIdStr, LocalDate.now(), LocalDate.now().plusDays(2), ReservationStatus.CONFIRMED);
+        reservationRepository.save(res1);
+        reservationRepository.flush();
+
+        ResponseEntity<Void> response = restClient.delete()
+                .uri("/" + res1.getId())
+                .retrieve()
+                .toBodilessEntity();
+
+        assertThat(response.getStatusCode().value()).isEqualTo(204);
+
+        ReservationEntity deleted = reservationRepository.findById(res1.getId()).orElseThrow();
+        assertThat(deleted.getStatus()).isEqualTo(ReservationStatus.REFUNDED);
+    }
+
 }

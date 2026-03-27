@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 class ReservationServiceTest {
@@ -143,6 +144,14 @@ class ReservationServiceTest {
     }
 
     @Test
+    void cancelShouldKeepRefundedWhenAlreadyRefunded() {
+        Reservation reservation = new Reservation("1", "guest-1", "room-1", "Room 1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.REFUNDED);
+        Reservation result = reservation.cancel();
+
+        assertEquals(ReservationStatus.REFUNDED, result.status());
+    }
+
+    @Test
     void cancelReservationInServiceShouldFailWhenAlreadyCancelled() {
         String reservationId = "res-1";
         Reservation reservation = new Reservation(reservationId, "guest-1", "room-1", "Room 1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CANCELLED);
@@ -158,4 +167,25 @@ class ReservationServiceTest {
 
         assertThrows(ReservationNotFoundException.class, () -> reservationService.cancelReservation(reservationId));
     }
+
+    @Test
+    void cancelReservationInServiceShouldRefundWhenConfirmed() {
+        String reservationId = "res-confirmed";
+        Reservation confirmed = new Reservation(
+                reservationId,
+                "guest-1",
+                "room-1",
+                "Room 1",
+                LocalDate.now(),
+                LocalDate.now().plusDays(1),
+                ReservationStatus.CONFIRMED
+        );
+        when(persistence.findById(reservationId)).thenReturn(Optional.of(confirmed));
+
+        reservationService.cancelReservation(reservationId);
+
+        verify(paymentPort).cancelReservationPayment(reservationId);
+        verify(persistence).save(argThat(reservation -> reservation.status() == ReservationStatus.REFUNDED));
+    }
+
 }
