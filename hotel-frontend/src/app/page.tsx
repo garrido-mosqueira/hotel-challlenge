@@ -6,15 +6,17 @@ import {
   NewHotelInput,
   NewReservationInput,
   NewRoomInput,
-  Notification,
-  NotificationType,
   Reservation,
   Room,
 } from '@/entities';
 import { apiClient } from '@/shared/services/apiClient';
+import { NotificationStack } from '@/shared/components/feedback/NotificationStack';
+import { useNotifications } from '@/shared/hooks/useNotifications';
 import { parseErrorMessage } from '@/shared/services/errorParser';
 
 export default function Home() {
+  const { notifications, showNotification, dismissNotification } = useNotifications();
+
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [newHotel, setNewHotel] = useState<NewHotelInput>({ name: '', city: '' });
   const [searchCity, setSearchCity] = useState('');
@@ -32,16 +34,6 @@ export default function Home() {
 
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
-
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  const showNotification = (message: string, type: NotificationType = 'info') => {
-    const id = Date.now();
-    setNotifications(prev => [...prev, { message, type, id }]);
-    setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id));
-    }, 5000);
-  };
 
   const handleError = async (response: Response, defaultMessage: string) => {
     const message = await parseErrorMessage(response, defaultMessage);
@@ -327,41 +319,7 @@ export default function Home() {
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
       <h1>Hotel Management System - API Testing Tool</h1>
 
-      {/* Notifications */}
-      <div style={{
-        position: 'fixed',
-        top: '1rem',
-        right: '1rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.5rem',
-        zIndex: 1000
-      }}>
-        {notifications.map(n => (
-          <div key={n.id} style={{
-            padding: '1rem',
-            borderRadius: '4px',
-            color: 'white',
-            backgroundColor: n.type === 'success' ? '#4caf50' : n.type === 'error' ? '#f44336' : '#2196f3',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-            minWidth: '250px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <span>{n.message}</span>
-            <button onClick={() => setNotifications(prev => prev.filter(notif => notif.id !== n.id))} style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '1.2rem',
-              marginLeft: '1rem'
-            }}>×</button>
-          </div>
-        ))}
-      </div>
+      <NotificationStack notifications={notifications} onDismiss={dismissNotification} />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
         
