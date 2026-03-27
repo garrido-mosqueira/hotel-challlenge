@@ -23,20 +23,12 @@ public class RabbitMQConfiguration {
     public static final String QUEUE_NAME = "reservation-payment-queue";
     public static final String EXCHANGE_NAME = "reservation-payment-exchange";
     public static final String ROUTING_KEY = "reservation.payment.start";
-    
-    public static final String CANCEL_QUEUE_NAME = "reservation-payment-cancel-queue";
-    public static final String CANCEL_ROUTING_KEY = "reservation.payment.cancel";
 
     @Bean
     public Queue queue() {
         return new Queue(QUEUE_NAME, false);
     }
     
-    @Bean
-    public Queue cancelQueue() {
-        return new Queue(CANCEL_QUEUE_NAME, false);
-    }
-
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange(EXCHANGE_NAME);
@@ -45,11 +37,6 @@ public class RabbitMQConfiguration {
     @Bean
     public Binding binding(Queue queue, TopicExchange exchange) {
         return BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY);
-    }
-    
-    @Bean
-    public Binding cancelBinding(Queue cancelQueue, TopicExchange exchange) {
-        return BindingBuilder.bind(cancelQueue).to(exchange).with(CANCEL_ROUTING_KEY);
     }
 
     @Bean
@@ -88,4 +75,5 @@ public class RabbitMQConfiguration {
                                                            TaskScheduler paymentTaskScheduler) {
         return new RabbitMQPaymentConsumer(persistencePort, paymentTaskScheduler);
     }
+
 }

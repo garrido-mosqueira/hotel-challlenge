@@ -57,7 +57,6 @@ public class ReservationService implements ReservationUseCase {
     public void cancelReservation(String id) {
         Reservation reservation = persistence.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("Reservation not found with id: " + id));
-        paymentPort.cancelReservationPayment(id);
         Reservation canceled = reservation.cancel();
         persistence.save(canceled);
     }

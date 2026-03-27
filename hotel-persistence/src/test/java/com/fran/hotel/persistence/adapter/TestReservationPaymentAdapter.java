@@ -1,6 +1,7 @@
 package com.fran.hotel.persistence.adapter;
 
 import com.fran.hotel.domain.model.Reservation;
+import com.fran.hotel.domain.model.ReservationStatus;
 import com.fran.hotel.domain.port.ReservationPaymentPort;
 import com.fran.hotel.domain.port.ReservationPersistencePort;
 import org.slf4j.Logger;
@@ -38,17 +39,21 @@ public class TestReservationPaymentAdapter implements ReservationPaymentPort {
         return reservation;
     }
 
-    @Override
-    public void cancelReservationPayment(String reservationId) {
-        log.info("Cancelling payment for reservation '{}'", reservationId);
-        var reservation = persistencePort.findById(reservationId);
-        if (reservation.isPresent()) {
-            persistencePort.save(reservation.get().cancel());
-        }
-    }
 
     private void confirmPayment(Reservation reservation) {
         log.info("Confirming payment for reservation '{}'", reservation.id());
-        persistencePort.save(reservation.confirm());
+        var currentReservation = persistencePort.findById(reservation.id());
+        if (currentReservation.isEmpty()) {
+            log.info("Reservation '{}' not found during payment confirmation", reservation.id());
+            return;
+        }
+
+        Reservation current = currentReservation.get();
+        if (current.status() == ReservationStatus.CANCELLED || current.status() == ReservationStatus.REFUNDED) {
+            log.info("Skipping payment confirmation for reservation '{}' because it is '{}'", reservation.id(), current.status());
+            return;
+        }
+
+        persistencePort.save(current.confirm());
     }
 }

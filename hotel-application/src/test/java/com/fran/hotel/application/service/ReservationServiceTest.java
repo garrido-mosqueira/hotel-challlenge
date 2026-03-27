@@ -138,6 +138,12 @@ class ReservationServiceTest {
     }
 
     @Test
+    void confirmShouldFailWhenRefunded() {
+        Reservation reservation = new Reservation("1", "guest-1", "room-1", "Room 1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.REFUNDED);
+        assertThrows(InvalidReservationStateException.class, reservation::confirm);
+    }
+
+    @Test
     void cancelShouldFailWhenAlreadyCancelled() {
         Reservation reservation = new Reservation("1", "guest-1", "room-1", "Room 1", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CANCELLED);
         assertThrows(ReservationAlreadyCancelledException.class, reservation::cancel);
@@ -184,7 +190,6 @@ class ReservationServiceTest {
 
         reservationService.cancelReservation(reservationId);
 
-        verify(paymentPort).cancelReservationPayment(reservationId);
         verify(persistence).save(argThat(reservation -> reservation.status() == ReservationStatus.REFUNDED));
     }
 

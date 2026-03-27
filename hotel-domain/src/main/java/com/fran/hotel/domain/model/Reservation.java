@@ -18,8 +18,8 @@ public record Reservation(
         ReservationStatus status) {
 
     public Reservation confirm() {
-        if (this.status == ReservationStatus.CANCELLED) {
-            throw new InvalidReservationStateException("Cannot confirm a cancelled reservation");
+        if (this.status == ReservationStatus.CANCELLED || this.status == ReservationStatus.REFUNDED) {
+            throw new InvalidReservationStateException("Cannot confirm a cancelled or refunded reservation");
         }
         return new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.CONFIRMED);
     }

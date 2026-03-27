@@ -6,6 +6,5 @@ public interface ReservationPaymentPort {
 
     Reservation executeReservationPayment(Reservation reservation);
 
-    void cancelReservationPayment(String reservationId);
 
 }
