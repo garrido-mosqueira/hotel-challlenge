@@ -59,7 +59,11 @@ This will start:
    ```bash
    ./mvnw clean install
    ```
-3. Run the API module:
+3. Run the API from the root directory:
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+4. (Alternative) Run the packaged JAR:
    ```bash
    java -jar hotel-api/target/hotel-java-1.1.0.jar
    ```
