@@ -26,8 +26,7 @@ public record Reservation(
 
     public Reservation cancel() {
         if (this.status == ReservationStatus.CONFIRMED) {
-            // Depending on business rules, we might allow cancelling a confirmed one or not.
-            // For now, let's just allow it but maybe prevent cancelling an already canceled one.
+            return new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.REFUNDED);
         }
         if (this.status == ReservationStatus.CANCELLED) {
             throw new ReservationAlreadyCancelledException("Reservation is already cancelled");
