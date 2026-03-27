@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import {
-  Hotel,
-  NewHotelInput,
   NewReservationInput,
   NewRoomInput,
   Reservation,
@@ -11,18 +9,32 @@ import {
 } from '@/entities';
 import { apiClient } from '@/shared/services/apiClient';
 import { NotificationStack } from '@/shared/components/feedback/NotificationStack';
+import { HotelsPanel } from '@/features/hotels/components/HotelsPanel';
+import { useHotels } from '@/features/hotels/hooks/useHotels';
 import { useNotifications } from '@/shared/hooks/useNotifications';
 import { parseErrorMessage } from '@/shared/services/errorParser';
 
 export default function Home() {
   const { notifications, showNotification, dismissNotification } = useNotifications();
 
-  const [hotels, setHotels] = useState<Hotel[]>([]);
-  const [newHotel, setNewHotel] = useState<NewHotelInput>({ name: '', city: '' });
-  const [searchCity, setSearchCity] = useState('');
-  const [loadingHotels, setLoadingHotels] = useState(true);
+  const {
+    hotels,
+    newHotel,
+    setNewHotel,
+    searchCity,
+    setSearchCity,
+    loadingHotels,
+    selectedHotel,
+    setSelectedHotel,
+    editingHotel,
+    setEditingHotel,
+    handleSearchHotels,
+    clearSearch,
+    handleAddHotel,
+    handleUpdateHotel,
+    handleDeleteHotel,
+  } = useHotels({ notify: showNotification });
 
-  const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [newRoom, setNewRoom] = useState<NewRoomInput>({ number: '', typeId: 'SINGLE', floor: 0, name: '', available: true });
   const [loadingRooms, setLoadingRooms] = useState(false);
@@ -32,7 +44,6 @@ export default function Home() {
   const [newReservation, setNewReservation] = useState<NewReservationInput>({ guestId: '', roomId: '', checkInDate: '', checkOutDate: '' });
   const [loadingReservations, setLoadingReservations] = useState(false);
 
-  const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
 
   const handleError = async (response: Response, defaultMessage: string) => {
@@ -41,118 +52,12 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchHotels();
-  }, []);
-
-  useEffect(() => {
     if (selectedHotel) {
       fetchRooms(selectedHotel.id);
     } else {
       setRooms([]);
     }
   }, [selectedHotel]);
-
-  // Hotel APIs
-  const fetchHotels = async () => {
-    setLoadingHotels(true);
-    try {
-      const response = await apiClient.get('/api/hotels', { cache: 'no-store' });
-      if (response.ok) {
-        const data = await response.json();
-        setHotels(Array.isArray(data) ? data : []);
-      } else {
-        await handleError(response, 'Failed to load hotels');
-        setHotels([]);
-      }
-    } catch (error) {
-      console.error('Failed to fetch hotels:', error);
-      showNotification('Failed to fetch hotels', 'error');
-      setHotels([]);
-    } finally {
-      setLoadingHotels(false);
-    }
-  };
-
-  const handleSearchHotels = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchCity) {
-      fetchHotels();
-      return;
-    }
-    setLoadingHotels(true);
-    try {
-      const response = await apiClient.get('/api/hotels/search', { query: { city: searchCity }, cache: 'no-store' });
-      if (response.ok) {
-        const data = await response.json();
-        setHotels(Array.isArray(data) ? data : []);
-        if (Array.isArray(data)) showNotification(`Found ${data.length} hotels`, 'info');
-      } else {
-        await handleError(response, 'Search failed');
-        setHotels([]);
-      }
-    } catch (error) {
-      console.error('Failed to search hotels:', error);
-      showNotification('Failed to search hotels', 'error');
-      setHotels([]);
-    } finally {
-      setLoadingHotels(false);
-    }
-  };
-
-  const handleAddHotel = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await apiClient.post('/api/hotels', newHotel, {
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (response.ok) {
-        setNewHotel({ name: '', city: '' });
-        showNotification('Hotel added successfully!', 'success');
-        fetchHotels();
-      } else {
-        await handleError(response, 'Failed to add hotel');
-      }
-    } catch (error) {
-      console.error('Failed to add hotel:', error);
-      showNotification('Error adding hotel', 'error');
-    }
-  };
-
-  const handleUpdateHotel = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingHotel) return;
-    try {
-      const response = await apiClient.put(`/api/hotels/${editingHotel.id}`, editingHotel, {
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (response.ok) {
-        setEditingHotel(null);
-        showNotification('Hotel updated successfully!', 'success');
-        fetchHotels();
-      } else {
-        await handleError(response, 'Failed to update hotel');
-      }
-    } catch (error) {
-      console.error('Failed to update hotel:', error);
-      showNotification('Error updating hotel', 'error');
-    }
-  };
-
-  const handleDeleteHotel = async (hotelId: string) => {
-    try {
-      const response = await apiClient.delete(`/api/hotels/${hotelId}`);
-      if (response.ok) {
-        if (selectedHotel?.id === hotelId) setSelectedHotel(null);
-        showNotification('Hotel deleted successfully!', 'success');
-        fetchHotels();
-      } else {
-        await handleError(response, 'Failed to delete hotel');
-      }
-    } catch (error) {
-      console.error('Failed to delete hotel:', error);
-      showNotification('Error deleting hotel', 'error');
-    }
-  };
 
   // Room APIs
   const fetchRooms = async (hotelId: string) => {
@@ -322,76 +227,24 @@ export default function Home() {
       <NotificationStack notifications={notifications} onDismiss={dismissNotification} />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-        
-        {/* HOTEL MANAGEMENT */}
-        <section style={{ border: '1px solid #ddd', padding: '1rem', borderRadius: '8px' }}>
-          <h2>Hotels</h2>
-          
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h3>Search Hotels</h3>
-            <form onSubmit={handleSearchHotels} style={{ display: 'flex', gap: '0.5rem' }}>
-              <input 
-                type="text" 
-                placeholder="City" 
-                value={searchCity} 
-                onChange={(e) => setSearchCity(e.target.value)} 
-                style={{ flex: 1, padding: '0.5rem' }} 
-              />
-              <button type="submit">Search</button>
-              <button type="button" onClick={() => { setSearchCity(''); fetchHotels(); }}>Clear</button>
-            </form>
-          </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h3>{editingHotel ? 'Edit Hotel' : 'Add New Hotel'}</h3>
-            <form onSubmit={editingHotel ? handleUpdateHotel : handleAddHotel} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <input 
-                type="text" 
-                placeholder="Name" 
-                value={editingHotel ? editingHotel.name : newHotel.name} 
-                onChange={(e) => editingHotel ? setEditingHotel({...editingHotel, name: e.target.value}) : setNewHotel({...newHotel, name: e.target.value})} 
-                required 
-                style={{ padding: '0.5rem' }} 
-              />
-              <input 
-                type="text" 
-                placeholder="City" 
-                value={editingHotel ? editingHotel.city : newHotel.city} 
-                onChange={(e) => editingHotel ? setEditingHotel({...editingHotel, city: e.target.value}) : setNewHotel({...newHotel, city: e.target.value})} 
-                required 
-                style={{ padding: '0.5rem' }} 
-              />
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button type="submit" style={{ flex: 1 }}>{editingHotel ? 'Update Hotel' : 'Add Hotel'}</button>
-                {editingHotel && <button type="button" onClick={() => setEditingHotel(null)}>Cancel</button>}
-              </div>
-            </form>
-          </div>
-
-          <div>
-            <h3>Hotels List</h3>
-            {loadingHotels ? <p>Loading...</p> : (
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {Array.isArray(hotels) && hotels.map(hotel => (
-                  <li key={hotel.id} style={{ 
-                    padding: '0.8rem', borderBottom: '1px solid #eee', 
-                    backgroundColor: selectedHotel?.id === hotel.id ? '#f0f7ff' : 'transparent',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                  }}>
-                    <div onClick={() => setSelectedHotel(hotel)} style={{ cursor: 'pointer', flex: 1 }}>
-                      <strong>{hotel.name}</strong> - {hotel.city} <br/>
-                      <small style={{ color: '#666' }}>ID: {hotel.id}</small>
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button onClick={() => setEditingHotel(hotel)}>Edit</button>
-                      <button onClick={() => handleDeleteHotel(hotel.id)} style={{ color: 'red' }}>Del</button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </section>
+        <HotelsPanel
+          hotels={hotels}
+          newHotel={newHotel}
+          searchCity={searchCity}
+          loadingHotels={loadingHotels}
+          selectedHotel={selectedHotel}
+          editingHotel={editingHotel}
+          setNewHotel={setNewHotel}
+          setSearchCity={setSearchCity}
+          setSelectedHotel={setSelectedHotel}
+          setEditingHotel={setEditingHotel}
+          onSearchHotels={handleSearchHotels}
+          onClearSearch={clearSearch}
+          onAddHotel={handleAddHotel}
+          onUpdateHotel={handleUpdateHotel}
+          onDeleteHotel={handleDeleteHotel}
+        />
 
         {/* ROOM MANAGEMENT */}
         <section style={{ border: '1px solid #ddd', padding: '1rem', borderRadius: '8px' }}>
