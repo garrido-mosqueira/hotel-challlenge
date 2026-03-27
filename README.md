@@ -1,27 +1,32 @@
 # Hotel Management Challenge
 
-A comprehensive hotel management system built with a modern tech stack, featuring a Hexagonal Architecture (Ports and Adapters) for the backend and a React-based frontend.
+A comprehensive hotel management system built with a modern tech stack, featuring a **Hexagonal Architecture (Ports and Adapters)** for the backend and a React-based frontend.
 
 ## 🏗 Project Structure
 
 The project follows a clean architecture approach, separating concerns into distinct modules:
 
-- **hotel-domain**: Contains the core business logic and domain entities. It is independent of any frameworks.
-- **hotel-application**: Implements the use cases and coordinates the domain logic.
-- **hotel-persistence**: Handles data storage using PostgreSQL and Redis.
-- **hotel-api**: Provides the RESTful API endpoints using Spring Boot.
-- **hotel-frontend**: A modern web interface built with Next.js.
+```
+hotel-challlenge/
+├── hotel-domain        # Core business logic and domain entities — framework-free
+├── hotel-application   # Use cases and application services
+├── hotel-persistence   # Data storage adapters (PostgreSQL, Redis, RabbitMQ)
+├── hotel-api           # RESTful API layer (Spring Boot entrypoint)
+└── hotel-frontend      # Web interface (Next.js + TypeScript)
+```
 
 ## 🛠 Technologies Used
 
 ### Backend
 - **Java 21**
 - **Spring Boot 3.2.0**
-- **PostgreSQL** (Primary database)
-- **Redis** (Caching and simulation)
-- **Lombok**
-- **MapStruct** (Object mapping)
-- **JUnit 5 & Testcontainers** (Testing)
+- **PostgreSQL 15** — Primary database
+- **Redis 7** — Caching
+- **RabbitMQ 3** — Async payment processing
+- **Flyway** — Database migrations
+- **Lombok** — Boilerplate reduction
+- **MapStruct** — Object mapping
+- **JUnit 5 & Testcontainers** — Integration testing
 
 ### Frontend
 - **Next.js**
@@ -31,6 +36,8 @@ The project follows a clean architecture approach, separating concerns into dist
 ### Infrastructure
 - **Docker & Docker Compose**
 
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -39,80 +46,147 @@ The project follows a clean architecture approach, separating concerns into dist
 - Maven (for manual builds)
 - Node.js (for frontend development)
 
-### Running with Docker Compose
+---
 
-The easiest way to get the entire system up and running is using Docker Compose:
+### Option A — Docker Compose (recommended)
+
+Starts PostgreSQL, Redis, RabbitMQ and the Spring Boot API all together:
 
 ```bash
 docker-compose up --build
 ```
 
-This will start:
-- PostgreSQL on port `5432`
-- Redis on port `6379`
-- Spring Boot API on port `8080`
+Services started:
+| Service    | Port   |
+|------------|--------|
+| PostgreSQL | `5432` |
+| Redis      | `6379` |
+| RabbitMQ   | `5672` (AMQP) / `15672` (management UI) |
+| API        | `8080` |
 
-### Manual Backend Setup
+---
 
-1. Navigate to the root directory.
-2. Build the project using Maven:
+### Option B — Manual Backend Setup
+
+1. Start infrastructure:
    ```bash
-   ./mvnw clean install
+   docker-compose up -d db redis rabbitmq
    ```
+
+2. Build all modules from the root directory:
+   ```bash
+   ./mvnw clean install -DskipTests
+   ```
+
 3. Run the API from the root directory:
    ```bash
    ./mvnw spring-boot:run
    ```
+
 4. (Alternative) Run the packaged JAR:
    ```bash
-   java -jar hotel-api/target/hotel-java-1.1.0.jar
+   java -jar hotel-api/target/hotel-api-1.1.0.jar
    ```
-   *Note: Ensure PostgreSQL and Redis are running and correctly configured in `application.properties`.*
+
+> **Note:** Ensure PostgreSQL, Redis and RabbitMQ are running before starting the API. Connection defaults are in `hotel-api/src/main/resources/application.yml`.
+
+---
 
 ### Frontend Setup
 
-1. Navigate to the `hotel-frontend` directory.
+1. Navigate to `hotel-frontend`:
+   ```bash
+   cd hotel-frontend
+   ```
+
 2. Install dependencies:
    ```bash
    npm install
    ```
+
 3. Run the development server:
    ```bash
    npm run dev
    ```
-   The frontend will be available at `http://localhost:3000`.
+
+Frontend available at `http://localhost:3000`. Requests to `/api/*` are proxied to the backend at `http://localhost:8080`.
+
+---
 
 ## 📡 API Endpoints
 
 ### Hotels
-- `GET /api/hotels` - List all hotels
-- `GET /api/hotels/{id}` - Get hotel details
-- `POST /api/hotels` - Add a new hotel
-- `PUT /api/hotels/{id}` - Update a hotel
-- `DELETE /api/hotels/{id}` - Delete a hotel
-- `GET /api/hotels/search?city={city}` - Search hotels by city
+
+| Method   | Endpoint                        | Description              |
+|----------|---------------------------------|--------------------------|
+| `GET`    | `/api/hotels`                   | List all hotels          |
+| `GET`    | `/api/hotels/{id}`              | Get hotel by ID          |
+| `POST`   | `/api/hotels`                   | Create a hotel           |
+| `PUT`    | `/api/hotels/{id}`              | Update a hotel           |
+| `DELETE` | `/api/hotels/{id}`              | Delete a hotel           |
+| `GET`    | `/api/hotels/search?city={city}`| Search hotels by city    |
 
 ### Rooms
-- `GET /api/hotels/{hotelId}/rooms` - List rooms for a hotel
-- `POST /api/hotels/{hotelId}/rooms` - Add a room to a hotel
-- `DELETE /api/hotels/{hotelId}/rooms/{roomId}` - Remove a room
+
+| Method   | Endpoint                                  | Description              |
+|----------|-------------------------------------------|--------------------------|
+| `GET`    | `/api/hotels/{hotelId}/rooms`             | List rooms for a hotel   |
+| `GET`    | `/api/hotels/{hotelId}/rooms/{roomId}`    | Get room by ID           |
+| `POST`   | `/api/hotels/{hotelId}/rooms`             | Add a room to a hotel    |
+| `PUT`    | `/api/hotels/{hotelId}/rooms/{roomId}`    | Update a room            |
+| `DELETE` | `/api/hotels/{hotelId}/rooms/{roomId}`    | Delete a room            |
 
 ### Reservations
-- `GET /api/reservations` - List reservations (requires `X-User-Id` header)
-- `POST /api/reservations` - Create a new reservation
-- `DELETE /api/reservations/{id}` - Cancel a reservation
+
+| Method   | Endpoint                     | Description                                      |
+|----------|------------------------------|--------------------------------------------------|
+| `GET`    | `/api/reservations`          | List reservations (requires `X-User-Id` header)  |
+| `GET`    | `/api/reservations/{id}`     | Get reservation by ID                            |
+| `POST`   | `/api/reservations`          | Create a reservation                             |
+| `DELETE` | `/api/reservations/{id}`     | Cancel a reservation                             |
+
+---
+
+## 🔄 Reservation Status Flow
+
+```
+PENDING ──► CONFIRMED ──► REFUNDED
+   │
+   └──► CANCELLED
+```
+
+| Transition             | Trigger                                       |
+|------------------------|-----------------------------------------------|
+| `PENDING → CONFIRMED`  | Async payment processing completes            |
+| `CONFIRMED → REFUNDED` | Cancel called on a confirmed reservation      |
+| `PENDING → CANCELLED`  | Cancel called on a pending reservation        |
+
+> Cancelling an already `REFUNDED` reservation is idempotent (stays `REFUNDED`).  
+> Cancelling an already `CANCELLED` reservation throws an error.
+
+---
 
 ## 🧪 Testing
 
-The project includes unit, integration, and architecture tests.
-
-To run backend tests:
+Run all backend tests:
 ```bash
 ./mvnw test
 ```
 
+Run a specific module's tests:
+```bash
+./mvnw -pl hotel-application test
+./mvnw -pl hotel-api -am test
+```
+
 Integration tests use **Testcontainers** to spin up real PostgreSQL and Redis instances, ensuring high fidelity with the production environment.
+
+---
 
 ## 📄 Postman Collection
 
-A Postman collection is provided in the root directory (`hotel-api.postman_collection.json`) to help you test the API endpoints easily.
+A Postman collection is available in the root directory:
+
+```
+hotel-api.postman_collection.json
+```
