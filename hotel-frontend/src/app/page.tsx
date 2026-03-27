@@ -1,53 +1,33 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-type Hotel = {
-  id: string;
-  name: string;
-  city: string;
-};
-
-type Room = {
-  id: string;
-  hotelId: string;
-  number: string;
-  typeId: string;
-  floor: number;
-  name: string;
-  available: boolean;
-};
-
-type Reservation = {
-  id: string;
-  guestId: string;
-  roomId: string;
-  roomName: string;
-  checkInDate: string;
-  checkOutDate: string;
-  status: string;
-};
-
-type Notification = {
-  message: string;
-  type: 'success' | 'error' | 'info';
-  id: number;
-};
+import {
+  Hotel,
+  NewHotelInput,
+  NewReservationInput,
+  NewRoomInput,
+  Notification,
+  NotificationType,
+  Reservation,
+  Room,
+} from '@/entities';
+import { apiClient } from '@/shared/services/apiClient';
+import { parseErrorMessage } from '@/shared/services/errorParser';
 
 export default function Home() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
-  const [newHotel, setNewHotel] = useState({ name: '', city: '' });
+  const [newHotel, setNewHotel] = useState<NewHotelInput>({ name: '', city: '' });
   const [searchCity, setSearchCity] = useState('');
   const [loadingHotels, setLoadingHotels] = useState(true);
 
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [newRoom, setNewRoom] = useState({ number: '', typeId: 'SINGLE', floor: 0, name: '', available: true });
+  const [newRoom, setNewRoom] = useState<NewRoomInput>({ number: '', typeId: 'SINGLE', floor: 0, name: '', available: true });
   const [loadingRooms, setLoadingRooms] = useState(false);
 
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [userId, setUserId] = useState('');
-  const [newReservation, setNewReservation] = useState({ guestId: '', roomId: '', checkInDate: '', checkOutDate: '' });
+  const [newReservation, setNewReservation] = useState<NewReservationInput>({ guestId: '', roomId: '', checkInDate: '', checkOutDate: '' });
   const [loadingReservations, setLoadingReservations] = useState(false);
 
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
@@ -55,26 +35,12 @@ export default function Home() {
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showNotification = (message: string, type: NotificationType = 'info') => {
     const id = Date.now();
     setNotifications(prev => [...prev, { message, type, id }]);
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
     }, 5000);
-  };
-
-  const parseErrorMessage = async (response: Response, defaultMessage: string) => {
-    try {
-      const text = await response.text();
-      try {
-        const data = JSON.parse(text);
-        return data.message || data.error || defaultMessage;
-      } catch (e) {
-        return text || response.statusText || defaultMessage;
-      }
-    } catch (e) {
-      return defaultMessage;
-    }
   };
 
   const handleError = async (response: Response, defaultMessage: string) => {
@@ -98,7 +64,7 @@ export default function Home() {
   const fetchHotels = async () => {
     setLoadingHotels(true);
     try {
-      const response = await fetch('/api/hotels', { cache: 'no-store' });
+      const response = await apiClient.get('/api/hotels', { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         setHotels(Array.isArray(data) ? data : []);
@@ -123,7 +89,7 @@ export default function Home() {
     }
     setLoadingHotels(true);
     try {
-      const response = await fetch(`/api/hotels/search?city=${searchCity}`, { cache: 'no-store' });
+      const response = await apiClient.get('/api/hotels/search', { query: { city: searchCity }, cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         setHotels(Array.isArray(data) ? data : []);
@@ -144,10 +110,8 @@ export default function Home() {
   const handleAddHotel = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/hotels', {
-        method: 'POST',
+      const response = await apiClient.post('/api/hotels', newHotel, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newHotel),
       });
       if (response.ok) {
         setNewHotel({ name: '', city: '' });
@@ -166,10 +130,8 @@ export default function Home() {
     e.preventDefault();
     if (!editingHotel) return;
     try {
-      const response = await fetch(`/api/hotels/${editingHotel.id}`, {
-        method: 'PUT',
+      const response = await apiClient.put(`/api/hotels/${editingHotel.id}`, editingHotel, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingHotel),
       });
       if (response.ok) {
         setEditingHotel(null);
@@ -186,7 +148,7 @@ export default function Home() {
 
   const handleDeleteHotel = async (hotelId: string) => {
     try {
-      const response = await fetch(`/api/hotels/${hotelId}`, { method: 'DELETE' });
+      const response = await apiClient.delete(`/api/hotels/${hotelId}`);
       if (response.ok) {
         if (selectedHotel?.id === hotelId) setSelectedHotel(null);
         showNotification('Hotel deleted successfully!', 'success');
@@ -204,7 +166,7 @@ export default function Home() {
   const fetchRooms = async (hotelId: string) => {
     setLoadingRooms(true);
     try {
-      const response = await fetch(`/api/hotels/${hotelId}/rooms`);
+      const response = await apiClient.get(`/api/hotels/${hotelId}/rooms`);
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -238,10 +200,8 @@ export default function Home() {
         ...newRoom,
         isAvailable: newRoom.available
       };
-      const response = await fetch(`/api/hotels/${selectedHotel.id}/rooms`, {
-        method: 'POST',
+      const response = await apiClient.post(`/api/hotels/${selectedHotel.id}/rooms`, roomToSubmit, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(roomToSubmit),
       });
       if (response.ok) {
         setNewRoom({ number: '', typeId: 'SINGLE', floor: 0, name: '', available: true });
@@ -264,10 +224,8 @@ export default function Home() {
         ...editingRoom,
         isAvailable: editingRoom.available
       };
-      const response = await fetch(`/api/hotels/${selectedHotel.id}/rooms/${editingRoom.id}`, {
-        method: 'PUT',
+      const response = await apiClient.put(`/api/hotels/${selectedHotel.id}/rooms/${editingRoom.id}`, roomToSubmit, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(roomToSubmit),
       });
       if (response.ok) {
         setEditingRoom(null);
@@ -285,7 +243,7 @@ export default function Home() {
   const handleDeleteRoom = async (roomId: string) => {
     if (!selectedHotel) return;
     try {
-      const response = await fetch(`/api/hotels/${selectedHotel.id}/rooms/${roomId}`, { method: 'DELETE' });
+      const response = await apiClient.delete(`/api/hotels/${selectedHotel.id}/rooms/${roomId}`);
       if (response.ok) {
         showNotification('Room deleted successfully!', 'success');
         fetchRooms(selectedHotel.id);
@@ -303,7 +261,7 @@ export default function Home() {
     e.preventDefault();
     setLoadingReservations(true);
     try {
-      const response = await fetch('/api/reservations', {
+      const response = await apiClient.get('/api/reservations', {
         headers: { 'X-User-Id': userId }
       });
       if (response.ok) {
@@ -326,10 +284,8 @@ export default function Home() {
   const handleCreateReservation = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/reservations', {
-        method: 'POST',
+      const response = await apiClient.post('/api/reservations', newReservation, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newReservation),
       });
       if (response.ok) {
         setNewReservation({ guestId: '', roomId: '', checkInDate: '', checkOutDate: '' });
@@ -345,12 +301,12 @@ export default function Home() {
 
   const handleCancelReservation = async (id: string) => {
     try {
-      const response = await fetch(`/api/reservations/${id}`, { method: 'DELETE' });
+      const response = await apiClient.delete(`/api/reservations/${id}`);
       if (response.ok) {
         showNotification('Reservation cancelled successfully!', 'success');
         if (userId) {
           // Refresh if user ID is entered
-          const refreshResponse = await fetch('/api/reservations', { headers: { 'X-User-Id': userId } });
+          const refreshResponse = await apiClient.get('/api/reservations', { headers: { 'X-User-Id': userId } });
           const data = await refreshResponse.json();
           if (Array.isArray(data)) {
             setReservations(data);
