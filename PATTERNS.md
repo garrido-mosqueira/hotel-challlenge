@@ -137,3 +137,32 @@ This pattern helps in maintaining the **Dry (Don't Repeat Yourself)** principle 
 
 ### 📚 Resources
 - [Martin Fowler - Data Transfer Object (Assembler mentions)](https://martinfowler.com/eaaCatalog/dataTransferObject.html)
+
+---
+
+## 8. 💉 Dependency Injection (Constructor Injection)
+
+### Intent
+To achieve Inversion of Control (IoC) by passing dependencies to a class through its constructor, rather than the class creating them itself. This promotes loose coupling and easier testing.
+
+### Implementation
+The project favors **Constructor Injection** over field injection (`@Autowired` on fields) for better testability and to ensure that objects are always in a valid, fully-initialized state.
+
+Example from [`HotelService.java`](hotel-application/src/main/java/com/fran/hotel/application/service/HotelService.java):
+```java
+public class HotelService implements HotelUseCase {
+    private final HotelPersistencePort persistence;
+
+    // Constructor Injection
+    public HotelService(HotelPersistencePort persistence) {
+        this.persistence = persistence;
+    }
+}
+```
+
+### Academic Perspective
+Constructor injection is the preferred method for implementing the **Dependency Inversion Principle**. It makes dependencies explicit and allows for the use of `final` fields, promoting **Immutability**. It also facilitates Unit Testing by making it trivial to inject mocks or stubs during test instantiation.
+
+### 📚 Resources
+- [Martin Fowler - Inversion of Control Containers and the Dependency Injection pattern](https://martinfowler.com/articles/injection.html)
+- [Baeldung - Intro to Inversion of Control and Dependency Injection with Spring](https://www.baeldung.com/inversion-control-and-dependency-injection-in-spring)
