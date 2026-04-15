@@ -18,23 +18,19 @@ public record Reservation(
         ReservationStatus status) {
 
     public Reservation confirm() {
-        if (this.status == ReservationStatus.CANCELLED || this.status == ReservationStatus.REFUNDED) {
-            throw new InvalidReservationStateException("Cannot confirm a cancelled or refunded reservation");
-        }
-        return new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.CONFIRMED);
+        return switch (this.status) {
+            case CANCELLED, REFUNDED -> throw new InvalidReservationStateException("Cannot confirm a cancelled or refunded reservation");
+            default -> new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.CONFIRMED);
+        };
     }
 
     public Reservation cancel() {
-        if (this.status == ReservationStatus.CONFIRMED) {
-            return new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.REFUNDED);
-        }
-        if (this.status == ReservationStatus.REFUNDED) {
-            return this;
-        }
-        if (this.status == ReservationStatus.CANCELLED) {
-            throw new ReservationAlreadyCancelledException("Reservation is already cancelled");
-        }
-        return new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.CANCELLED);
+        return switch (this.status) {
+            case CONFIRMED -> new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.REFUNDED);
+            case REFUNDED -> this;
+            case CANCELLED -> throw new ReservationAlreadyCancelledException("Reservation is already cancelled");
+            case PENDING -> new Reservation(id, guestId, roomId, roomName, checkInDate, checkOutDate, ReservationStatus.CANCELLED);
+        };
     }
 
     public Reservation pending() {
