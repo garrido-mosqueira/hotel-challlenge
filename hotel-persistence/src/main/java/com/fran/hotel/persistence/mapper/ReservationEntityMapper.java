@@ -10,7 +10,6 @@ public interface ReservationEntityMapper {
 
     ReservationEntity toEntity(Reservation reservation);
 
-    @Mapping(target = "id", source = "id")
     Reservation toDomain(ReservationEntity reservationEntity);
 
 }
