@@ -35,7 +35,6 @@ hotel-challlenge/
 
 ### Infrastructure
 - **Docker & Docker Compose**
-
 ---
 
 ## 🚀 Getting Started
